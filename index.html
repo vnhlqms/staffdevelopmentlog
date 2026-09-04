@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VNH Laboratory — Staff Development &amp; Competency</title>
+<style>
+:root{--navy:#0c2d48;--green:#1a5f2a;--gold:#c9a227;--red:#8b1a1a;--amber:#b45309;--border:#c5cdd8;--text:#1a1a1a;--muted:#5a6570;--err:#c5221f;--sidebar:#0a2439;--sidebar-w:240px;--topbar-h:52px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;background:#e8edf2;color:var(--text);line-height:1.45;min-height:100vh}
+#page-login{min-height:100vh;display:none;align-items:center;justify-content:center;background:linear-gradient(160deg,#0c2d48,#1a5f2a);padding:1.3rem}
+#page-login.active{display:flex}
+.login-box{background:#fff;border-radius:10px;padding:1.8rem 1.9rem;width:100%;max-width:420px;box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.login-box .logo-wrap{text-align:center;margin-bottom:1rem}
+.login-box .logo-wrap img{width:82px;height:auto}
+.login-box h2{text-align:center;color:var(--navy);font-size:1.1rem;margin-bottom:.18rem}
+.login-box .sub{text-align:center;font-size:.78rem;color:var(--muted);margin-bottom:1.2rem}
+.login-box .field{margin-bottom:.75rem;display:flex;flex-direction:column;gap:.16rem}
+.login-box .field label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase}
+.login-box .field input{border:1px solid var(--border);border-radius:4px;padding:.34rem .45rem;font-size:.82rem}
+.login-error{background:#fce8e6;color:#c5221f;font-size:.78rem;padding:.38rem .6rem;border-radius:4px;margin-bottom:.7rem;display:none}
+.login-error.show{display:block}
+.login-hint{font-size:.7rem;color:var(--muted);text-align:center;margin-top:.85rem}
+#app-shell{display:none;min-height:100vh}
+#app-shell.active{display:flex;flex-direction:column}
+.topbar{height:var(--topbar-h);background:linear-gradient(135deg,var(--navy),#163a5f);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;gap:.75rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar .brand{display:flex;align-items:center;gap:.55rem}
+.topbar .brand img{width:32px;height:auto;background:#fff;border-radius:4px;padding:2px}
+.topbar .brand h1{font-size:.9rem;font-weight:600}
+.topbar .top-actions{display:flex;align-items:center;gap:.5rem;font-size:.78rem;flex-wrap:wrap}
+.topbar .freshness{opacity:.85;font-size:.72rem}
+.shell-body{display:flex;flex:1;min-height:0}
+.sidebar{width:var(--sidebar-w);background:var(--sidebar);color:#e8eef4;flex-shrink:0;display:flex;flex-direction:column;padding:.75rem 0;overflow-y:auto}
+.sidebar .side-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:#8aa0b5;padding:.5rem 1rem .25rem}
+.sidebar .nav-btn{display:flex;align-items:center;gap:.55rem;width:100%;text-align:left;padding:.55rem 1rem;border:none;background:transparent;color:#d0dbe6;font-size:.82rem;font-weight:500;cursor:pointer;border-left:3px solid transparent;font-family:inherit}
+.sidebar .nav-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+.sidebar .nav-btn.active{background:rgba(26,95,42,.35);border-left-color:var(--gold);color:#fff}
+.sidebar .nav-btn .ico{width:1.25rem;text-align:center}
+.sidebar .side-foot{margin-top:auto;padding:.75rem 1rem;font-size:.68rem;color:#8aa0b5;border-top:1px solid rgba(255,255,255,.08)}
+.main{flex:1;overflow-y:auto;padding:1rem 1.1rem 2rem}
+.page{display:none}.page.active{display:block}
+.btn{display:inline-flex;align-items:center;gap:.22rem;padding:.34rem .65rem;border:none;border-radius:4px;font-size:.78rem;font-weight:500;cursor:pointer;font-family:inherit}
+.btn-primary{background:var(--green);color:#fff}.btn-primary:hover{background:#144a20}
+.btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--border)}.btn-secondary:hover{background:#eef2f7}
+.btn-danger{background:var(--red);color:#fff}
+.btn-outline-light{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.45)}.btn-outline-light:hover{background:rgba(255,255,255,.12)}
+.btn-sm{padding:.22rem .45rem;font-size:.72rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.card{background:#fff;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:1rem 1.15rem;margin-bottom:.9rem}
+.card h2{font-size:.98rem;color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:.28rem;margin-bottom:.75rem}
+.card h3{font-size:.88rem;color:var(--navy);margin:.8rem 0 .45rem}
+.hint{font-size:.78rem;color:var(--muted);background:#f0f4f8;border-left:3px solid var(--gold);padding:.45rem .7rem;margin-bottom:.75rem}
+.hint.warn{border-left-color:var(--amber);background:#fffbeb}
+.hint.ok{border-left-color:var(--green);background:#f0fdf4}
+.toolbar{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.75rem;align-items:center}
+.toolbar .spacer{flex:1}
+.status-msg{font-size:.76rem;padding:.28rem .55rem;border-radius:4px;display:none}
+.status-msg.show{display:inline-block}
+.status-msg.ok{background:#e6f4ea;color:#137333}
+.status-msg.err{background:#fce8e6;color:#c5221f}
+table.data{width:100%;border-collapse:collapse;font-size:.82rem}
+table.data th,table.data td{border:1px solid var(--border);padding:.38rem .45rem;text-align:left}
+table.data th{background:var(--navy);color:#fff;font-weight:600;font-size:.72rem}
+table.data tr:nth-child(even){background:#f4f7fa}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.55rem .85rem}
+.field{display:flex;flex-direction:column;gap:.14rem}
+.field.full{grid-column:1/-1}
+.field label{font-size:.66rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.field input,.field select,.field textarea{border:1px solid var(--border);border-radius:4px;padding:.32rem .42rem;font-size:.82rem;font-family:inherit;background:#fff}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 2px rgba(12,45,72,.12)}
+.field textarea{min-height:50px;resize:vertical}
+.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--err);background:#fff5f5}
+.field .err-msg{font-size:.7rem;color:var(--err);display:none}
+.field.invalid .err-msg{display:block}
+.empty-state{text-align:center;padding:1.5rem;color:var(--muted)}
+.dash-filters{display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-end;margin-bottom:1rem;padding:.75rem 1rem;background:#fff;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.dash-filters .field{min-width:140px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-bottom:1rem}
+.kpi-card{background:#fff;border-radius:8px;padding:.9rem 1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:3px solid var(--navy)}
+.kpi-card.ok{border-top-color:var(--green)}.kpi-card.warn{border-top-color:var(--amber)}.kpi-card.bad{border-top-color:var(--red)}
+.kpi-card .kpi-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.kpi-card .kpi-value{font-size:1.65rem;font-weight:700;color:var(--navy);margin:.15rem 0}
+.kpi-card .kpi-cmp{font-size:.72rem;color:var(--muted)}
+.kpi-card .kpi-trend.up{color:var(--green);font-weight:600}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.85rem;margin-bottom:1rem}
+.chart-card{background:#fff;border-radius:8px;padding:.85rem 1rem;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.chart-card h3{font-size:.82rem;color:var(--navy);margin:0 0 .55rem;font-weight:600}
+.chart-card svg{width:100%;height:auto;display:block}
+.badge{display:inline-block;font-size:.68rem;font-weight:600;padding:.12rem .4rem;border-radius:3px}
+.badge-green{background:#e6f4ea;color:#137333}.badge-red{background:#fce8e6;color:#c5221f}.badge-amber{background:#fef3c7;color:#92400e}.badge-blue{background:#e8f0fe;color:#1a56db}
+.official-form{background:#fff;border:1px solid #ccc}
+.form-header{display:flex;align-items:flex-start;gap:.85rem;padding:.8rem 1rem .55rem;border-bottom:3px solid var(--navy)}
+.form-header img{width:60px;height:auto}
+.form-header .titles{flex:1;text-align:center}
+.form-header .titles .org{font-size:.85rem;font-weight:700;color:var(--navy);text-transform:uppercase}
+.form-header .titles .dept{font-size:.76rem;color:var(--green);font-weight:600}
+.form-header .titles .doc-title{font-size:1rem;font-weight:700;color:var(--navy);margin-top:.2rem}
+.form-header .meta{font-size:.66rem;color:var(--muted);text-align:right}
+.form-body{padding:.8rem 1rem 1rem}
+.instructions{font-size:.72rem;color:#333;background:#f8f9fb;border:1px solid var(--border);padding:.4rem .6rem;margin-bottom:.7rem}
+.section-label{font-size:.72rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.04em;margin:.85rem 0 .3rem;border-bottom:1px solid var(--border);padding-bottom:.14rem;display:flex;justify-content:space-between;align-items:center}
+.activity-table{width:100%;border-collapse:collapse;font-size:.7rem}
+.activity-table th{background:var(--navy);color:#fff;padding:.28rem .2rem;border:1px solid #0a2439;text-align:center}
+.activity-table td{border:1px solid var(--border);padding:.06rem}
+.activity-table input,.activity-table select{width:100%;border:none;background:transparent;padding:.18rem .12rem;font-size:.7rem;font-family:inherit}
+.sign-block{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.8rem;padding-top:.65rem;border-top:1px solid var(--border)}
+.sign-pad-wrap{border:1px solid var(--border);border-radius:4px;background:#fafbfc;margin-top:.25rem}
+.sign-pad-wrap canvas{display:block;width:100%;height:90px;cursor:crosshair;touch-action:none}
+.sign-pad-tools{padding:.2rem .3rem;border-top:1px solid var(--border);background:#f0f4f8}
+.file-field{border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;background:#fafbfc;margin-top:.3rem}
+.file-field .file-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.file-field .file-btn{background:#f0f2f5;border:1px solid #c5cdd8;border-radius:4px;padding:.38rem .8rem;font-size:.8rem;cursor:pointer}
+.file-field input[type=file]{display:none}
+.file-field .file-name{font-size:.8rem;color:var(--muted)}
+.file-field .file-name.has-file{color:var(--navy);font-weight:500}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin-top:.45rem}
+.ach-card{border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative;background:#fafbfc}
+.ach-card img{width:100%;height:95px;object-fit:contain;background:#fff;border-bottom:1px solid var(--border)}
+.ach-card .ach-meta{padding:.3rem;font-size:.66rem}
+.ach-card .ach-meta strong{display:block;font-size:.72rem;color:var(--navy)}
+.ach-card .ach-actions{position:absolute;top:2px;right:2px}
+.ach-card .file-icon{height:95px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:#eef2f6;border-bottom:1px solid var(--border)}
+.print-achievements{display:none;grid-template-columns:repeat(2,1fr);gap:.45rem}
+.print-ach-item{border:1px solid #ccc;padding:.3rem;text-align:center}
+.print-ach-item img{max-width:100%;max-height:140px;object-fit:contain}
+.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.25rem .7rem;font-size:.78rem}
+.checkbox-grid label{display:flex;align-items:center;gap:.3rem;cursor:pointer;font-weight:400;text-transform:none;color:var(--text);font-size:.78rem}
+.priv-list{display:grid;grid-template-columns:1fr 1fr;gap:.3rem .5rem;font-size:.8rem}
+.priv-list label{display:flex;align-items:flex-start;gap:.3rem;cursor:pointer;font-weight:400;text-transform:none;color:var(--text)}
+.priv-tag{display:inline-block;font-size:.66rem;padding:.08rem .32rem;border-radius:3px;background:#e8f0fe;color:#1a56db;margin:.08rem}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:6px;max-width:500px;width:100%;padding:1.15rem;max-height:90vh;overflow-y:auto}
+.modal h3{color:var(--navy);margin-bottom:.7rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.35rem;margin-top:.85rem}
+.cv-doc{background:#fff;border:1px solid #ccc;padding:1.3rem 1.5rem}
+.cv-header{display:flex;align-items:center;gap:.85rem;border-bottom:3px solid var(--navy);padding-bottom:.7rem;margin-bottom:.85rem}
+.cv-header img{width:60px}
+.cv-header h1{font-size:1.25rem;color:var(--navy);margin:0}
+.cv-section{margin:.8rem 0}
+.cv-section h3{font-size:.8rem;color:var(--navy);text-transform:uppercase;border-bottom:1px solid var(--border);padding-bottom:.15rem;margin-bottom:.35rem}
+.cover{text-align:center;padding:1.4rem 1rem}
+.cover img{width:90px;margin-bottom:.5rem}
+.cover .org-name{font-size:.95rem;font-weight:700;color:var(--navy);text-transform:uppercase}
+.cover .dept-name{font-size:.88rem;color:var(--green);font-weight:600}
+.cover .doc-name{font-size:1.2rem;font-weight:700;color:var(--navy);margin:.7rem 0 .2rem}
+.footer-note{font-size:.65rem;color:var(--muted);margin-top:.8rem;text-align:center;border-top:1px solid var(--border);padding-top:.45rem}
+.sync-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;background:#94a3b8}
+.sync-dot.on{background:#22c55e}.sync-dot.err{background:#ef4444}.sync-dot.busy{background:#f59e0b;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+@media print{
+body{background:#fff}
+.topbar,.sidebar,.no-print,.toolbar,.btn,.ach-actions,.sign-pad-tools,.file-field .file-row,.dash-filters{display:none!important}
+.shell-body{display:block}.main{padding:0}
+.page{display:none!important}
+.page.active,#page-log.print-mode,#page-cv.print-mode,#page-competency.print-mode{display:block!important}
+.card,.official-form,.cv-doc{box-shadow:none;border:none}
+.sign-pad-wrap canvas{display:none}.sign-pad-wrap .sig-print{display:block!important;max-height:50px}
+.ach-grid{display:none}.print-achievements{display:grid!important}
+}
+@page{size:A4 portrait;margin:10mm}
+@media(max-width:900px){
+.sidebar{width:56px}
+.sidebar .nav-btn span.lbl,.sidebar .side-label,.sidebar .side-foot{display:none}
+.sidebar .nav-btn{justify-content:center;padding:.55rem}
+}
+</style>
+</head>
+<body>
+
+<div id="page-login">
+<div class="login-box">
+<div class="logo-wrap"><img id="login-logo" alt="Coat of Arms" width="82" height="105"/></div>
+<h2>Vanuatu National Hospital</h2>
+<div class="sub">Laboratory Department<br/>Staff Development &amp; Competency Log</div>
+<div id="login-error" class="login-error"></div>
+<div class="field"><label for="login-user">Username</label><input type="text" id="login-user" autocomplete="username"/></div>
+<div class="field"><label for="login-pass">Password</label><input type="password" id="login-pass" autocomplete="current-password"/></div>
+<button class="btn btn-primary" style="width:100%;justify-content:center;padding:.5rem;margin-top:.2rem" onclick="doLogin()">Sign In</button>
+<div class="login-hint">Default: <strong>admin</strong> / <strong>vnhlab2026</strong><br/>Multi-user via GitHub sync · IndexedDB cache</div>
+</div>
+</div>
+
+<div id="app-shell">
+<header class="topbar no-print">
+<div class="brand">
+<img id="hdr-logo" alt="COA" width="32" height="40"/>
+<h1>VNH Laboratory Department</h1>
+</div>
+<div class="top-actions">
+<span id="sync-indicator"><span class="sync-dot" id="sync-dot"></span><span id="sync-label">Local only</span></span>
+<span class="freshness" id="data-freshness">Last refreshed: —</span>
+<span class="user-chip" id="user-chip"></span>
+<button class="btn btn-outline-light btn-sm" onclick="githubPull()" title="Pull from GitHub">↓ Pull</button>
+<button class="btn btn-outline-light btn-sm" onclick="githubPush()" title="Push to GitHub">↑ Push</button>
+<button class="btn btn-outline-light btn-sm" onclick="doLogout()">Logout</button>
+</div>
+</header>
+<div class="shell-body">
+<aside class="sidebar no-print">
+<div class="side-label">Navigation</div>
+<button type="button" class="nav-btn active" data-page="home" onclick="showPage('home')"><span class="ico">⌂</span><span class="lbl">Home</span></button>
+<button type="button" class="nav-btn" data-page="dashboard" onclick="showPage('dashboard')"><span class="ico">▣</span><span class="lbl">Dashboard</span></button>
+<button type="button" class="nav-btn" data-page="employees" onclick="showPage('employees')"><span class="ico">☰</span><span class="lbl">Staff Development Log</span></button>
+<button type="button" class="nav-btn" data-page="competency" onclick="showPage('competency')"><span class="ico">✓</span><span class="lbl">Staff Competency Log</span></button>
+<button type="button" class="nav-btn" data-page="log" id="nav-log-btn" onclick="showPage('log')" style="display:none"><span class="ico">✎</span><span class="lbl">Current Log</span></button>
+<button type="button" class="nav-btn" data-page="cv" id="nav-cv-btn" onclick="showPage('cv')" style="display:none"><span class="ico">📄</span><span class="lbl">Staff CV</span></button>
+<button type="button" class="nav-btn" data-page="github" onclick="showPage('github')"><span class="ico">☁</span><span class="lbl">GitHub Sync</span></button>
+<button type="button" class="nav-btn" data-page="users" id="nav-users-btn" onclick="showPage('users')" style="display:none"><span class="ico">⚙</span><span class="lbl">Users &amp; Privileges</span></button>
+<button type="button" class="nav-btn" data-page="help" onclick="showPage('help')"><span class="ico">?</span><span class="lbl">Help &amp; Settings</span></button>
+<div class="side-foot">VNH PER.2704i · v03<br/>Multi-user GitHub mode</div>
+</aside>
+<main class="main">
+
+<div id="page-home" class="page">
+<div class="card">
+<div class="cover">
+<img id="cover-logo" alt="Coat of Arms" width="90" height="115"/>
+<div class="org-name">Vanuatu National Hospital</div>
+<div class="dept-name">Laboratory Department</div>
+<div class="doc-name">Staff Development &amp; Competency System</div>
+<div style="font-size:.78rem;color:var(--muted);margin-top:.35rem">Shared multi-user data via GitHub · Local IndexedDB cache</div>
+</div>
+<div class="hint" id="home-priv-hint">Configure GitHub Sync so multiple staff can share the same data.</div>
+<div class="hint ok" id="home-sync-hint" style="display:none"></div>
+</div>
+</div>
+
+<div id="page-github" class="page">
+<div class="card">
+<h2>GitHub Sync — Shared multi-user storage</h2>
+<p class="hint">Multiple users can work at the same time by storing the shared database as a JSON file in a GitHub repository. Each user pulls before editing and pushes after saving. Use a <strong>private</strong> repository.</p>
+<p class="hint warn"><strong>Important:</strong> GitHub is not a real-time database. Concurrent edits to the same record can overwrite each other (last push wins). Prefer one editor per staff record at a time. Always <strong>Pull</strong> before major edits and <strong>Push</strong> when finished.</p>
+<div class="form-grid">
+<div class="field"><label for="gh-owner">Repository owner (user or org)</label><input type="text" id="gh-owner" placeholder="e.g. vnh-lab"/></div>
+<div class="field"><label for="gh-repo">Repository name</label><input type="text" id="gh-repo" placeholder="e.g. staff-development-log"/></div>
+<div class="field"><label for="gh-branch">Branch</label><input type="text" id="gh-branch" value="main" placeholder="main"/></div>
+<div class="field"><label for="gh-path">Data file path in repo</label><input type="text" id="gh-path" value="data/vnh_store.json" placeholder="data/vnh_store.json"/></div>
+<div class="field full"><label for="gh-token">Personal Access Token (PAT)</label><input type="password" id="gh-token" placeholder="ghp_… (repo scope) — stored only in this browser session"/></div>
+</div>
+<div class="toolbar" style="margin-top:.75rem">
+<button class="btn btn-primary" onclick="saveGithubConfig()">Save configuration</button>
+<button class="btn btn-secondary" onclick="githubPull()">↓ Pull from GitHub</button>
+<button class="btn btn-secondary" onclick="githubPush()">↑ Push to GitHub</button>
+<button class="btn btn-secondary" onclick="testGithubConnection()">Test connection</button>
+<span id="gh-status" class="status-msg"></span>
+</div>
+<p class="hint" style="margin-top:1rem"><strong>Setup steps</strong><br/>
+1. Create a private GitHub repository.<br/>
+2. Optionally create an empty file <code>data/vnh_store.json</code> with content <code>{"employees":[],"users":[]}</code>.<br/>
+3. Create a Fine-grained or classic PAT with <code>repo</code> (contents read/write) on that repository.<br/>
+4. Enter owner, repo, path, and token above → Save → Pull.<br/>
+5. Host this HTML via GitHub Pages (or open the file). Each staff member uses the same repo settings and their own login account from the shared Users list.</p>
+<p class="hint"><strong>Security:</strong> The PAT is kept in <code>sessionStorage</code> only (cleared when the browser tab is closed). Never commit a token into the HTML file or a public repo. Prefer fine-grained tokens limited to one private repository.</p>
+</div>
+<div class="card">
+<h3>Sync status</h3>
+<table class="data">
+<tr><th>Item</th><th>Value</th></tr>
+<tr><td>Mode</td><td id="gh-mode-label">Local only</td></tr>
+<tr><td>Remote SHA</td><td id="gh-sha-label">—</td></tr>
+<tr><td>Last pull</td><td id="gh-pull-label">—</td></tr>
+<tr><td>Last push</td><td id="gh-push-label">—</td></tr>
+<tr><td>Employees in memory</td><td id="gh-emp-count">0</td></tr>
+</table>
+</div>
+</div>
+
+<div id="page-dashboard" class="page">
+<div class="card" style="padding-bottom:.5rem"><h2>Laboratory Staff Dashboard</h2>
+<p class="hint">Overview from shared (or local) records. Pull from GitHub to refresh shared data.</p></div>
+<div class="dash-filters no-print">
+<div class="field"><label>Date from</label><input type="date" id="dash-from"/></div>
+<div class="field"><label>Date to</label><input type="date" id="dash-to"/></div>
+<div class="field"><label>Section</label><select id="dash-section"><option value="">All sections</option></select></div>
+<div class="field"><label>Search</label><input type="search" id="dash-search" placeholder="Name or staff ID"/></div>
+<button class="btn btn-primary" onclick="refreshDashboard()">Apply</button>
+<button class="btn btn-secondary" onclick="resetDashFilters()">Reset</button>
+<button class="btn btn-secondary" onclick="exportDashCSV()">Export CSV</button>
+</div>
+<div class="kpi-grid" id="kpi-grid"></div>
+<div class="chart-grid">
+<div class="chart-card"><h3>Competence outcomes</h3><div id="chart-outcomes"></div></div>
+<div class="chart-card"><h3>CPD points by staff (top 8)</h3><div id="chart-cpd"></div></div>
+<div class="chart-card"><h3>Activities by type</h3><div id="chart-types"></div></div>
+<div class="chart-card"><h3>Authorisations due (≤90 days)</h3><div id="chart-auth"></div></div>
+</div>
+<div class="card"><h2>Staff summary</h2>
+<table class="data"><thead><tr><th>Staff</th><th>Section</th><th>Position</th><th>Activities</th><th>CPD</th><th>Outcome</th><th>Auth review</th><th>Actions</th></tr></thead>
+<tbody id="dash-tbody"></tbody></table>
+</div>
+<div class="footer-note">VNH Dashboard · GitHub-synced multi-user mode available</div>
+</div>
+
+<div id="page-employees" class="page">
+<div class="card">
+<h2>Staff Development Log — Directory</h2>
+<p class="hint">Each employee links to Development Log and Competency Log. After edits, Push to GitHub so others see changes.</p>
+<div class="toolbar no-print">
+<button class="btn btn-primary" id="btn-add-emp" onclick="openAddEmployee()">+ Add Employee</button>
+<button class="btn btn-secondary" id="btn-export-all" onclick="exportAllData()">Export JSON</button>
+<label class="btn btn-secondary" id="btn-import-all" style="cursor:pointer">Import JSON<input type="file" accept=".json" style="display:none" onchange="importAllData(event)"/></label>
+<button class="btn btn-secondary" onclick="githubPull()">↓ Pull</button>
+<button class="btn btn-secondary" onclick="githubPush()">↑ Push</button>
+<span class="spacer"></span>
+<span id="emp-status" class="status-msg"></span>
+</div>
+<table class="data" id="employee-table">
+<thead><tr><th>Staff Member</th><th>Staff ID</th><th>Position</th><th>Section</th><th>Activities</th><th>Files</th><th>Actions</th></tr></thead>
+<tbody id="employee-tbody"></tbody>
+</table>
+<div id="empty-employees" class="empty-state" style="display:none"><strong>No employees yet.</strong></div>
+</div>
+</div>
+
+<div id="page-competency" class="page">
+<div class="card">
+<h2>Staff Competency Log</h2>
+<p class="hint">Vanuatu National Hospital Laboratory Department — Staff Competency Log. Linked from each Staff Development Log record.</p>
+<div class="toolbar no-print">
+<input type="search" id="comp-search" placeholder="Search…" style="padding:.32rem .5rem;border:1px solid var(--border);border-radius:4px;font-size:.82rem;min-width:180px" oninput="renderCompetencyList()"/>
+<span class="spacer"></span>
+<span id="comp-status" class="status-msg"></span>
+</div>
+<table class="data" id="comp-table">
+<thead><tr><th>Staff</th><th>Staff ID</th><th>Section</th><th>Authorised tasks</th><th>Outcome</th><th>Re-auth due</th><th>Status</th><th>Actions</th></tr></thead>
+<tbody id="comp-tbody"></tbody>
+</table>
+<div id="empty-comp" class="empty-state" style="display:none"><strong>No records.</strong></div>
+</div>
+<div class="card" id="comp-detail-card" style="display:none">
+<h2 id="comp-detail-title">Competency record</h2>
+<div class="form-grid">
+<div class="field full"><label for="c-auth-tasks">Authorised tasks / procedures</label><textarea id="c-auth-tasks" rows="3"></textarea></div>
+<div class="field"><label for="c-auth-date">Authorisation date</label><input type="date" id="c-auth-date"/></div>
+<div class="field"><label for="c-auth-person">Authorising person</label><input type="text" id="c-auth-person"/></div>
+<div class="field full"><label for="c-auth-scope">Scope / limitations</label><textarea id="c-auth-scope" rows="2"></textarea></div>
+<div class="field"><label for="c-auth-review">Re-authorisation due</label><input type="date" id="c-auth-review"/></div>
+<div class="field"><label for="c-outcome">Outcome</label><select id="c-outcome"><option value="">—</option><option>Competent</option><option>Requires further training</option><option>Not yet competent</option></select></div>
+<div class="field"><label for="c-assess-date">Assessment date</label><input type="date" id="c-assess-date"/></div>
+<div class="field"><label for="c-assessor">Assessor</label><input type="text" id="c-assessor"/></div>
+<div class="field full"><label for="c-comments">Comments</label><textarea id="c-comments" rows="2"></textarea></div>
+</div>
+<div class="toolbar no-print" style="margin-top:.75rem">
+<button class="btn btn-primary" id="btn-save-comp" onclick="saveCompetencyDetail()">Save competency</button>
+<button class="btn btn-secondary" onclick="openLog(currentCompId)">Open development log</button>
+<button class="btn btn-secondary" onclick="githubPush()">↑ Push to GitHub</button>
+<span id="comp-detail-status" class="status-msg"></span>
+</div>
+</div>
+</div>
+
+<div id="page-log" class="page">
+<div class="toolbar no-print">
+<button class="btn btn-secondary" onclick="showPage('employees')">← Directory</button>
+<button class="btn btn-primary" id="btn-save-log" onclick="saveCurrentLog(true)">Save Log</button>
+<button class="btn btn-secondary" onclick="githubPush()">↑ Push</button>
+<button class="btn btn-secondary" onclick="printLog()">Print / PDF</button>
+<button class="btn btn-secondary" id="btn-export-word" onclick="exportWord()">Export Word</button>
+<button class="btn btn-secondary" onclick="openCVFromLog()">CV</button>
+<button class="btn btn-secondary" onclick="openCompetencyFromLog()">Competency</button>
+<button class="btn btn-secondary" id="btn-export-json" onclick="exportLogJSON()">Export JSON</button>
+<label class="btn btn-secondary" id="btn-import-json" style="cursor:pointer">Import JSON<input type="file" accept=".json" style="display:none" onchange="importLogJSON(event)"/></label>
+<span class="spacer"></span>
+<span id="log-status" class="status-msg"></span>
+</div>
+<div class="card official-form">
+<div class="form-header">
+<img id="form-logo" alt="COA" width="60" height="78"/>
+<div class="titles">
+<div class="org">Vanuatu National Hospital</div>
+<div class="dept">Laboratory Department</div>
+<div class="doc-title">STAFF DEVELOPMENT LOG</div>
+</div>
+<div class="meta"><div>VNH PER.2704i</div><div>Version 03</div></div>
+</div>
+<div class="form-body">
+<div class="instructions"><strong>Instructions:</strong> Complete after each activity. Attach evidence with Choose File. Pull/Push GitHub for multi-user sharing.</div>
+<div class="section-label">1. Staff Identification</div>
+<div class="form-grid">
+<div class="field" data-req="true"><label for="f-name">Full Name *</label><input type="text" id="f-name"/><span class="err-msg">Required</span></div>
+<div class="field"><label for="f-staffid">Staff ID</label><input type="text" id="f-staffid"/></div>
+<div class="field" data-req="true"><label for="f-post">Job Title / Position *</label><input type="text" id="f-post"/><span class="err-msg">Required</span></div>
+<div class="field"><label for="f-section">Department / Section</label><input type="text" id="f-section"/></div>
+<div class="field"><label for="f-start">Commencement</label><input type="date" id="f-start"/></div>
+<div class="field"><label for="f-supervisor">Supervisor</label><input type="text" id="f-supervisor"/></div>
+<div class="field"><label for="f-oncall">On-call</label><select id="f-oncall"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+</div>
+<div class="section-label">2. Competence Requirements</div>
+<div class="form-grid">
+<div class="field full"><label for="f-comp-ref">Competence reference</label><textarea id="f-comp-ref" rows="2"></textarea></div>
+<div class="field"><label for="f-qual">Qualifications</label><input type="text" id="f-qual"/></div>
+<div class="field"><label for="f-reg-no">Registration No.</label><input type="text" id="f-reg-no"/></div>
+<div class="field"><label for="f-reg-exp">Licence expiry</label><input type="date" id="f-reg-exp"/></div>
+</div>
+<div class="section-label"><span>3. Training Activities</span><button type="button" class="btn btn-primary btn-sm no-print" id="btn-add-act" onclick="addActivityRow()">+ Add</button></div>
+<div style="overflow-x:auto">
+<table class="activity-table">
+<thead><tr><th>Date(s)</th><th>Title</th><th>Type</th><th>Delivery</th><th>Duration</th><th>Trainer</th><th>Location</th><th>CPD</th><th class="no-print"></th></tr></thead>
+<tbody id="activity-tbody"></tbody>
+<tfoot><tr style="background:#eef2f6;font-weight:600"><td colspan="7" style="text-align:right;padding:.3rem">TOTAL CPD</td><td id="tot-cpd">0</td><td class="no-print"></td></tr></tfoot>
+</table>
+</div>
+<div class="form-grid" style="margin-top:.4rem"><div class="field full"><label for="f-act-desc">Learning objectives</label><textarea id="f-act-desc" rows="2"></textarea></div></div>
+<div class="section-label">4. Assessment</div>
+<div class="form-grid">
+<div class="field"><label for="f-assess-method">Method</label><select id="f-assess-method"><option value="">—</option><option>Direct observation</option><option>Written / practical test</option><option>Review of work records</option><option>Problem-solving exercise</option><option>Inter-laboratory comparison samples</option><option>Supervisor evaluation</option><option>Combination of methods</option><option>Other</option></select></div>
+<div class="field"><label for="f-assess-date">Date</label><input type="date" id="f-assess-date"/></div>
+<div class="field"><label for="f-assessor">Assessor</label><input type="text" id="f-assessor"/></div>
+<div class="field"><label for="f-outcome">Outcome</label><select id="f-outcome"><option value="">—</option><option>Competent</option><option>Requires further training</option><option>Not yet competent</option></select></div>
+<div class="field full"><label for="f-assess-comments">Comments</label><textarea id="f-assess-comments" rows="2"></textarea></div>
+<div class="field full"><label for="f-evidence">Evidence</label><input type="text" id="f-evidence"/></div>
+</div>
+<div class="section-label">5. Authorisation</div>
+<div class="form-grid">
+<div class="field full"><label for="f-auth-tasks">Authorised tasks</label><textarea id="f-auth-tasks" rows="2"></textarea></div>
+<div class="field"><label for="f-auth-date">Date</label><input type="date" id="f-auth-date"/></div>
+<div class="field"><label for="f-auth-person">Authorising person</label><input type="text" id="f-auth-person"/></div>
+<div class="field full"><label for="f-auth-scope">Scope / limitations</label><textarea id="f-auth-scope" rows="2"></textarea></div>
+<div class="field"><label for="f-auth-review">Re-authorisation due</label><input type="date" id="f-auth-review"/></div>
+</div>
+<div class="section-label">6. CPD</div>
+<div class="form-grid">
+<div class="field"><label for="f-cpd-points">CPD points</label><input type="number" step="0.1" min="0" id="f-cpd-points"/></div>
+<div class="field"><label for="f-prof-body">Professional body</label><input type="text" id="f-prof-body"/></div>
+<div class="field full"><label for="f-reflection">Reflection</label><textarea id="f-reflection" rows="2"></textarea></div>
+<div class="field full"><label for="f-suitability">Suitability review</label><textarea id="f-suitability" rows="2"></textarea></div>
+</div>
+<div class="section-label">7. Performance Review</div>
+<div class="form-grid">
+<div class="field"><label for="f-perf-link">Review link</label><input type="text" id="f-perf-link"/></div>
+<div class="field full"><label for="f-dev-needs">Development needs</label><textarea id="f-dev-needs" rows="2"></textarea></div>
+<div class="field full"><label for="f-pdp">PDP actions</label><textarea id="f-pdp" rows="2"></textarea></div>
+</div>
+<div class="section-label">8. Attachments</div>
+<p class="hint no-print">Choose File — certificates / awards. Large base64 attachments increase the GitHub file size; keep images reasonably small.</p>
+<div class="form-grid no-print">
+<div class="field"><label for="ach-title">Title</label><input type="text" id="ach-title"/></div>
+<div class="field"><label for="ach-date">Date</label><input type="date" id="ach-date"/></div>
+<div class="field"><label for="ach-type">Type</label><select id="ach-type"><option>Certificate</option><option>Award</option><option>Diploma</option><option>Licence</option><option>Letter</option><option>Other</option></select></div>
+</div>
+<div class="file-field no-print" id="file-attach-zone">
+<div class="file-row">
+<label class="file-btn" for="ach-file">Choose File</label>
+<input type="file" id="ach-file" accept="image/*,.pdf,.doc,.docx" multiple onchange="handleAchievementFiles(event)"/>
+<span class="file-name" id="file-chosen-label">No file chosen</span>
+</div>
+</div>
+<div id="ach-grid" class="ach-grid no-print"></div>
+<div id="print-achievements" class="print-achievements"></div>
+<div class="section-label">9. Record Control &amp; Signatures</div>
+<div class="form-grid">
+<div class="field"><label for="f-record-no">Record number</label><input type="text" id="f-record-no"/></div>
+<div class="field"><label for="f-version">Version</label><input type="text" id="f-version" value="03"/></div>
+<div class="field"><label for="f-next-assess">Next assessment</label><input type="date" id="f-next-assess"/></div>
+<div class="field"><label for="f-retention">Retention</label><input type="text" id="f-retention"/></div>
+</div>
+<div class="sign-block">
+<div>
+<label style="font-size:.7rem;font-weight:600;color:var(--muted)">Staff signature</label>
+<div class="sign-pad-wrap"><canvas id="sig-staff" width="400" height="90"></canvas>
+<img class="sig-print" id="sig-staff-print" style="display:none;max-height:50px;margin:.25rem" alt=""/>
+<div class="sign-pad-tools no-print"><button type="button" class="btn btn-sm btn-secondary" onclick="clearSig('staff')">Clear</button></div></div>
+<div class="field" style="margin-top:.25rem"><label for="f-staff-sig-date">Date</label><input type="date" id="f-staff-sig-date" style="max-width:10rem"/></div>
+</div>
+<div>
+<label style="font-size:.7rem;font-weight:600;color:var(--muted)">Supervisor / QM signature</label>
+<div class="sign-pad-wrap"><canvas id="sig-sup" width="400" height="90"></canvas>
+<img class="sig-print" id="sig-sup-print" style="display:none;max-height:50px;margin:.25rem" alt=""/>
+<div class="sign-pad-tools no-print"><button type="button" class="btn btn-sm btn-secondary" onclick="clearSig('sup')">Clear</button></div></div>
+<div class="field" style="margin-top:.25rem"><label for="f-sup-sig-date">Date</label><input type="date" id="f-sup-sig-date" style="max-width:10rem"/></div>
+</div>
+</div>
+<div class="section-label">10. Supporting Documents</div>
+<div class="checkbox-grid" id="attachments-grid">
+<label><input type="checkbox" data-att="cert"/> Certificates / licences</label>
+<label><input type="checkbox" data-att="attendance"/> Attendance</label>
+<label><input type="checkbox" data-att="checklist"/> Competence checklists</label>
+<label><input type="checkbox" data-att="jd"/> Job description</label>
+<label><input type="checkbox" data-att="incident"/> Incident reports</label>
+<label><input type="checkbox" data-att="immun"/> Immunisation</label>
+<label><input type="checkbox" data-att="other"/> Other</label>
+</div>
+<div class="form-grid" style="margin-top:.35rem"><div class="field full"><label for="f-att-notes">Notes</label><input type="text" id="f-att-notes"/></div></div>
+<div class="footer-note">VNH PER.2704i · Multi-user GitHub sync capable</div>
+</div>
+</div>
+</div>
+
+<div id="page-cv" class="page">
+<div class="toolbar no-print">
+<button class="btn btn-secondary" onclick="showPage('employees')">← Directory</button>
+<button class="btn btn-primary" onclick="printCV()">Print / PDF CV</button>
+<button class="btn btn-secondary" onclick="exportCVWord()">Export Word</button>
+<span id="cv-status" class="status-msg"></span>
+</div>
+<div class="card"><div class="cv-doc" id="cv-content"></div></div>
+</div>
+
+<div id="page-users" class="page">
+<div class="card">
+<h2>Users &amp; Privileges</h2>
+<p class="hint">User accounts are included in the shared GitHub data file so every workstation uses the same logins after Pull. Only Administrators manage users. Push after changes.</p>
+<div class="toolbar no-print">
+<button class="btn btn-primary" onclick="openAddUser()">+ Add User</button>
+<button class="btn btn-secondary" onclick="githubPush()">↑ Push users to GitHub</button>
+<span class="spacer"></span>
+<span id="users-status" class="status-msg"></span>
+</div>
+<table class="data"><thead><tr><th>Username</th><th>Display Name</th><th>Privileges</th><th>Active</th><th>Actions</th></tr></thead>
+<tbody id="users-tbody"></tbody></table>
+</div>
+</div>
+
+<div id="page-help" class="page">
+<div class="card">
+<h2>Help — Multi-user, storage &amp; conflict resolution</h2>
+<p class="hint"><strong>Simultaneous login:</strong> Yes. Each person opens the same GitHub Pages URL (or local copy), signs in with their account, Pulls shared data, works, then Pushes.</p>
+<p class="hint" style="margin-top:.4rem"><strong>Where data lives:</strong> Canonical shared copy = JSON file in your private GitHub repo. Local <strong>IndexedDB</strong> is a per-browser cache for speed and offline use.</p>
+<p class="hint warn" style="margin-top:.4rem"><strong>Not real-time (GitHub mode):</strong> Two people editing the same employee at once can overwrite each other (last Push wins). Prefer one editor per staff record. Always <strong>Pull</strong> before major edits and <strong>Push</strong> when finished.</p>
+<p class="hint" style="margin-top:.4rem"><strong>Workflow:</strong> Pull → edit → Save → Push. Top bar has quick Pull/Push buttons.</p>
+</div>
+
+<div class="card">
+<h2>1. IndexedDB conflict resolution strategies</h2>
+<p class="hint">IndexedDB is local to each browser profile. Conflicts appear when (a) multiple tabs on the same machine write the cache, or (b) local cache diverges from the GitHub shared file after offline edits.</p>
+<table class="data">
+<thead><tr><th>Strategy</th><th>How it works</th><th>In this app</th></tr></thead>
+<tbody>
+<tr>
+<td><strong>Last-write-wins (LWW)</strong></td>
+<td>Newest timestamp or version replaces older data. Simple; may drop concurrent edits.</td>
+<td>GitHub Push uses file SHA; if remote changed, push fails until you Pull (see optimistic locking below).</td>
+</tr>
+<tr>
+<td><strong>Optimistic concurrency (SHA / version)</strong></td>
+<td>Read current version (SHA). Write only if SHA still matches. On mismatch → conflict → reload and retry.</td>
+<td><strong>Implemented</strong> for GitHub: <code>githubPush()</code> re-fetches SHA; HTTP 409 / SHA mismatch → “Pull, then Push again”.</td>
+</tr>
+<tr>
+<td><strong>Pull-before-edit</strong></td>
+<td>Always refresh shared state before opening a record for editing.</td>
+<td>Recommended workflow. Auto-Pull runs after login when GitHub is configured.</td>
+</tr>
+<tr>
+<td><strong>Record-level locking (soft)</strong></td>
+<td>Mark a record as “being edited by X until T”. Others see a warning.</td>
+<td>Not built-in (would need real-time presence). Coordinate by section or staff name.</td>
+</tr>
+<tr>
+<td><strong>Merge by field / CRDT</strong></td>
+<td>Merge non-overlapping field changes; use CRDTs for automatic merge.</td>
+<td>Not implemented (complex). Manual merge: Pull, re-apply your field changes, Push.</td>
+</tr>
+<tr>
+<td><strong>Tab-level coordination</strong></td>
+<td><code>BroadcastChannel</code> or <code>storage</code> events notify other tabs on the same origin.</td>
+<td>Local cache is single-writer per save; avoid editing the same log in two tabs.</td>
+</tr>
+<tr>
+<td><strong>Snapshot + audit</strong></td>
+<td>Keep previous versions (Git history on GitHub provides this).</td>
+<td>Each Push is a Git commit — use GitHub history to recover an overwritten version.</td>
+</tr>
+</tbody>
+</table>
+<div class="code-block" style="background:#1e293b;color:#e2e8f0;font-family:Consolas,Monaco,monospace;font-size:.75rem;padding:.75rem 1rem;border-radius:6px;overflow-x:auto;margin:.5rem 0 1rem;line-height:1.5;white-space:pre-wrap">// Optimistic concurrency pattern used on Push
+const check = await fetch(contentsUrl);          // current remote file
+const { sha } = await check.json();
+const put = await fetch(contentsUrl, {
+  method: "PUT",
+  body: JSON.stringify({ message, content: base64, sha, branch })
+});
+if (put.status === 409) {
+  // Remote changed since our last Pull — resolve by Pull → merge → Push
+}</div>
+<p style="font-size:.8rem;color:var(--muted)">Practical rule for the laboratory: <strong>one person edits one staff record at a time</strong>; always Pull first; Push when done; use GitHub commit history if something was overwritten.</p>
+</div>
+
+<div class="card">
+<h2>2. Firebase Realtime Database — investigation</h2>
+<p class="hint">Firebase Realtime Database (RTDB) is a cloud-hosted JSON tree with <strong>live listeners</strong>. It is a strong option when true simultaneous multi-user editing is required beyond GitHub file sync.</p>
+<table class="data">
+<thead><tr><th>Topic</th><th>Finding</th></tr></thead>
+<tbody>
+<tr><td><strong>What it is</strong></td><td>NoSQL JSON tree; clients subscribe with <code>on("value")</code> / <code>on("child_changed")</code> and receive updates in milliseconds.</td></tr>
+<tr><td><strong>Multi-user</strong></td><td>Designed for concurrent clients. Security Rules control read/write per path (e.g. per lab, per role).</td></tr>
+<tr><td><strong>Conflict handling</strong></td><td>Last write to a path wins at the leaf; use transactions (<code>transaction()</code>) for counters or conditional updates; structure data so different users write different paths when possible.</td></tr>
+<tr><td><strong>Offline</strong></td><td>Official SDKs keep a local cache and queue writes; sync when back online (similar role to our IndexedDB cache).</td></tr>
+<tr><td><strong>Auth</strong></td><td>Firebase Authentication (email, Google, etc.) + custom claims for Principal Lab roles — maps cleanly to our RBAC privileges.</td></tr>
+<tr><td><strong>vs GitHub sync</strong></td><td>GitHub: simple, private repo, free, audit via commits, <em>not</em> real-time. Firebase: real-time, presence, finer rules, needs Firebase project &amp; SDK, usage quotas/billing at scale.</td></tr>
+<tr><td><strong>vs Firestore</strong></td><td>Firestore is document/query oriented; RTDB is a live JSON tree. Either can host this lab schema; Firestore often preferred for new apps with complex queries.</td></tr>
+<tr><td><strong>Data shape (example)</strong></td><td><code>/labs/vnh/employees/{id}</code>, <code>/labs/vnh/users/{uid}</code>, <code>/labs/vnh/meta/updatedAt</code> — avoid one giant root blob so concurrent edits touch different nodes.</td></tr>
+<tr><td><strong>Security Rules (sketch)</strong></td><td>Allow read if authenticated; allow write if <code>auth.token.role</code> in admin/principal/scientist…; validate required fields server-side in rules.</td></tr>
+<tr><td><strong>This HTML app today</strong></td><td>Uses <strong>GitHub Contents API + IndexedDB</strong>. Firebase is <em>not</em> embedded (would need project API keys and the Firebase JS SDK). Migration path: keep the same UI; replace <code>githubPull/Push</code> with RTDB <code>get</code>/<code>set</code>/<code>on</code> listeners.</td></tr>
+</tbody>
+</table>
+<div class="code-block" style="background:#1e293b;color:#e2e8f0;font-family:Consolas,Monaco,monospace;font-size:.75rem;padding:.75rem 1rem;border-radius:6px;overflow-x:auto;margin:.5rem 0 1rem;line-height:1.5;white-space:pre-wrap">// Conceptual Firebase RTDB integration (not active in this file)
+import { getDatabase, ref, onValue, update, runTransaction } from "firebase/database";
+const db = getDatabase();
+const employeesRef = ref(db, "labs/vnh/employees");
+onValue(employeesRef, (snap) => {
+  store.employees = Object.values(snap.val() || {});
+  renderEmployeeList(); // live UI update for all connected users
+});
+// Conditional update example
+await runTransaction(ref(db, "labs/vnh/employees/"+id+"/outcome"), (current) => {
+  // return new value only if still appropriate
+  return nextOutcome;
+});</div>
+<p style="font-size:.8rem;color:var(--muted)"><strong>Recommendation:</strong> Keep GitHub sync for a private lab repo if staff count is small and edits are coordinated. Move to Firebase (or Supabase) when you need live multi-user editing, presence (“user X is editing…”), and server-enforced security rules without managing a custom backend.</p>
+</div>
+
+<div class="card">
+<h2>3. CRDT algorithms (explore)</h2>
+<p class="hint"><strong>CRDT</strong> (Conflict-free Replicated Data Type) structures merge concurrent updates without central locks. Useful when multiple lab workstations edit offline and later sync.</p>
+<table class="data">
+<thead><tr><th>Algorithm / type</th><th>Behaviour</th><th>Fit for this log</th></tr></thead>
+<tbody>
+<tr>
+<td><strong>G-Counter / PN-Counter</strong></td>
+<td>Grow-only or increment/decrement counters that merge by taking per-replica max then summing.</td>
+<td>Total CPD points across replicas; not ideal as sole store for full employee records.</td>
+</tr>
+<tr>
+<td><strong>G-Set / 2P-Set / OR-Set</strong></td>
+<td>Sets that only add (G-Set), or add+remove with tombstones (2P-Set / observed-remove set).</td>
+<td>OR-Set suits lists of activity rows or attachment IDs when two users add different rows offline.</td>
+</tr>
+<tr>
+<td><strong>LWW-Register / LWW-Element-Set</strong></td>
+<td>Each field keeps (value, timestamp). Merge keeps the highest timestamp.</td>
+<td>Simple per-field merge for name, outcome, dates. Clock skew can mis-order events.</td>
+</tr>
+<tr>
+<td><strong>MV-Register</strong></td>
+<td>Keeps all concurrent values until a user resolves the conflict.</td>
+<td>Good UX for “two outcomes set offline” — surface both and let QM choose.</td>
+</tr>
+<tr>
+<td><strong>RGA / WOOT / Yjs-style sequences</strong></td>
+<td>Ordered sequences for collaborative text; complex.</td>
+<td>Overkill for form fields; relevant only if free-text notes were co-edited live.</td>
+</tr>
+<tr>
+<td><strong>JSON CRDTs (Automerge, Yjs Doc)</strong></td>
+<td>Map CRDT operations onto nested JSON documents.</td>
+<td>Best long-term approach for full <code>employees[]</code> documents if moving beyond GitHub LWW.</td>
+</tr>
+</tbody>
+</table>
+<div class="code-block" style="background:#1e293b;color:#e2e8f0;font-family:Consolas,Monaco,monospace;font-size:.75rem;padding:.75rem 1rem;border-radius:6px;overflow-x:auto;margin:.5rem 0 1rem;line-height:1.5;white-space:pre-wrap">// Conceptual LWW field merge (not a full CRDT library)
+function mergeEmployee(local, remote) {
+  const out = { ...remote };
+  for (const key of Object.keys(local)) {
+    if (key === "id") continue;
+    const lt = local._meta?.[key]?.ts || 0;
+    const rt = remote._meta?.[key]?.ts || 0;
+    out[key] = lt >= rt ? local[key] : remote[key];
+  }
+  // Activities: OR-Set style — union by activity id
+  const byId = new Map();
+  for (const a of [...(remote.activities||[]), ...(local.activities||[])]) {
+    if (a.id) byId.set(a.id, a);
+  }
+  out.activities = [...byId.values()];
+  return out;
+}</div>
+<p style="font-size:.8rem;color:var(--muted)"><strong>This app today:</strong> GitHub sync is <strong>file-level optimistic LWW</strong> (SHA check), not a field-level CRDT. CRDTs would be introduced with a library (e.g. Automerge) or a backend (Firebase/Firestore) that stores operations. Practical rule remains: one editor per staff record when using GitHub Push.</p>
+</div>
+
+<div class="card">
+<h2>4. Firebase Firestore — check</h2>
+<p class="hint">Firestore is Firebase’s document database. Compared with Realtime Database, it uses collections/documents, richer queries, and different pricing/offline behaviour.</p>
+<table class="data">
+<thead><tr><th>Topic</th><th>Assessment for VNH Staff Log</th></tr></thead>
+<tbody>
+<tr><td><strong>Data model</strong></td><td>Collection <code>employees</code> with one document per staff member; subcollections for <code>activities</code> / <code>achievements</code> if lists grow large.</td></tr>
+<tr><td><strong>Multi-user</strong></td><td>Realtime listeners (<code>onSnapshot</code>) update all clients. Concurrent writes to different documents do not conflict.</td></tr>
+<tr><td><strong>Conflicts</strong></td><td>Last write per document field wins unless you use transactions or batched writes. Security Rules enforce who can edit.</td></tr>
+<tr><td><strong>Queries</strong></td><td>Filter by section, outcome, authReview ≤ date — stronger than RTDB for dashboard KPIs.</td></tr>
+<tr><td><strong>Offline</strong></td><td>Persistent local cache built into the SDK; writes queue and resolve when online.</td></tr>
+<tr><td><strong>vs RTDB</strong></td><td>Prefer Firestore for structured lab records and queries; RTDB for simple live presence / typing indicators.</td></tr>
+<tr><td><strong>vs GitHub file</strong></td><td>Firestore: true multi-user, no manual Pull/Push, path always defined by collection IDs. GitHub: simple ops ownership, commit audit, no Firebase bill.</td></tr>
+<tr><td><strong>Security</strong></td><td>Rules example: allow write if <code>request.auth != null &amp;&amp; request.auth.token.role in ['admin','scientist',…]</code>.</td></tr>
+<tr><td><strong>This HTML</strong></td><td>Firestore is <em>not</em> wired in (needs Firebase project + SDK). Documented as the upgrade path when GitHub LWW is insufficient.</td></tr>
+</tbody>
+</table>
+<div class="code-block" style="background:#1e293b;color:#e2e8f0;font-family:Consolas,Monaco,monospace;font-size:.75rem;padding:.75rem 1rem;border-radius:6px;overflow-x:auto;margin:.5rem 0 1rem;line-height:1.5;white-space:pre-wrap">// Conceptual Firestore shape (not active)
+// employees/{employeeId}
+// { name, staffId, section, outcome, authReview, updatedAt, updatedBy }
+// employees/{employeeId}/activities/{activityId}
+// employees/{employeeId}/achievements/{achId}
+
+import { getFirestore, collection, doc, onSnapshot, setDoc } from "firebase/firestore";
+const db = getFirestore();
+onSnapshot(collection(db, "labs", "vnh", "employees"), (snap) => {
+  store.employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderEmployeeList();
+});
+await setDoc(doc(db, "labs", "vnh", "employees", id), emp, { merge: true });</div>
+<p style="font-size:.8rem;color:var(--muted)"><strong>Path note:</strong> Firestore paths are collection/document segments (no “missing file path”). GitHub mode requires an explicit repo file path — validated and defaulted to <code>data/vnh_store.json</code> in this app.</p>
+</div>
+
+<div class="card">
+<h2>5. GitHub data file path (fixed)</h2>
+<p class="hint">The shared store path must be non-empty, relative, and without <code>..</code> segments. If left blank, the app uses <code>data/vnh_store.json</code>. Paths without a file extension get <code>/vnh_store.json</code> appended.</p>
+<table class="data">
+<thead><tr><th>Item</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Default path</td><td><code>data/vnh_store.json</code></td></tr>
+<tr><td>Config fields</td><td>Owner, repository, branch, <strong>data file path</strong>, PAT</td></tr>
+<tr><td>Validation</td><td><code>normalizeGhPath()</code> — trim, strip leading slashes, block <code>.</code>/<code>..</code>, ensure file name</td></tr>
+<tr><td>API URL</td><td><code>/repos/{owner}/{repo}/contents/{path}</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>6. Change password</h2>
+
+<div class="form-grid" style="max-width:360px">
+<div class="field"><label for="new-pass">New password</label><input type="password" id="new-pass"/></div>
+<div class="field"><label for="new-pass2">Confirm</label><input type="password" id="new-pass2"/></div>
+</div>
+<button class="btn btn-primary" style="margin-top:.4rem" onclick="changePassword()">Update</button>
+<span id="pass-status" class="status-msg"></span>
+<p class="hint" style="margin-top:.75rem">After changing a password, <strong>Push to GitHub</strong> so other workstations receive the updated users list on their next Pull.</p>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+<div class="modal-overlay" id="emp-modal">
+<div class="modal">
+<h3 id="emp-modal-title">Add Employee</h3>
+<div class="form-grid">
+<div class="field"><label for="m-name">Full Name *</label><input type="text" id="m-name"/></div>
+<div class="field"><label for="m-staffid">Staff ID</label><input type="text" id="m-staffid"/></div>
+<div class="field"><label for="m-post">Position</label><input type="text" id="m-post"/></div>
+<div class="field"><label for="m-section">Section</label><input type="text" id="m-section"/></div>
+<div class="field"><label for="m-start">Commencement</label><input type="date" id="m-start"/></div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-secondary" onclick="closeEmpModal()">Cancel</button>
+<button class="btn btn-primary" onclick="saveEmployeeFromModal()">Save</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="user-modal">
+<div class="modal">
+<h3 id="user-modal-title">Add User</h3>
+<div class="form-grid">
+<div class="field"><label for="u-username">Username *</label><input type="text" id="u-username"/></div>
+<div class="field"><label for="u-displayname">Display name</label><input type="text" id="u-displayname"/></div>
+<div class="field"><label for="u-password">Password *</label><input type="password" id="u-password"/></div>
+<div class="field"><label for="u-active">Status</label><select id="u-active"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+</div>
+<div style="margin-top:.6rem">
+<label style="font-size:.7rem;font-weight:600;color:var(--muted)">PRIVILEGES</label>
+<div class="priv-list" id="u-priv-list">
+<label><input type="checkbox" value="admin"/> Administrator</label>
+<label><input type="checkbox" value="principal"/> Principal</label>
+<label><input type="checkbox" value="quality_manager"/> Quality Manager</label>
+<label><input type="checkbox" value="lab_supervisor"/> Lab Supervisor</label>
+<label><input type="checkbox" value="scientist"/> Scientist</label>
+<label><input type="checkbox" value="technician"/> Technician</label>
+<label><input type="checkbox" value="readonly"/> Read Only</label>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+<button class="btn btn-primary" onclick="saveUserFromModal()">Save User</button>
+</div>
+</div>
+</div>
+
+<script>
+const COA_B64="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";
+const AUTH_KEY="vnh_sdl_users_v1";
+const GH_CFG_KEY="vnh_gh_cfg_v1";
+const IDB_NAME="VNH_StaffDevelopmentLog";
+const IDB_VERSION=1;
+const IDB_STORE="encrypted_store";
+const DEFAULT_ADMIN={username:"admin",displayName:"System Administrator",password:"vnhlab2026",active:true,privileges:["admin","principal","quality_manager","lab_supervisor","scientist"]};
+const PRIV_LABELS={admin:"Administrator",principal:"Principal",quality_manager:"Quality Manager",lab_supervisor:"Lab Supervisor",scientist:"Scientist",technician:"Technician",readonly:"Read Only"};
+const MAX_FILE=4*1024*1024;
+const ACTIVITY_TYPES=["Induction / initial training","Re-training","Continuing professional development (CPD)","External course","Internal workshop","E-learning","Conference","Professional liaison activity","Supervised practice","Other"];
+const DELIVERY_METHODS=["Classroom","Practical demonstration","Supervised practice","Online platform","Self-directed study","Blended","Other"];
+
+let store={employees:[]};
+let users=[JSON.parse(JSON.stringify(DEFAULT_ADMIN))];
+let currentUser=null,currentId=null,currentCompId=null,currentAchievements=[],sigPads={},idb=null;
+let ghConfig={owner:"",repo:"",branch:"main",path:"data/vnh_store.json",token:""};
+let ghSha=null,ghLastPull=null,ghLastPush=null,ghBusy=false;
+
+function openIDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,IDB_VERSION);req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(IDB_STORE))db.createObjectStore(IDB_STORE,{keyPath:"id"});if(!db.objectStoreNames.contains("meta"))db.createObjectStore("meta",{keyPath:"key"});};req.onsuccess=e=>{idb=e.target.result;resolve(idb);};req.onerror=e=>reject(e.target.error);});}
+function idbPut(storeName,value){return new Promise((resolve,reject)=>{const tx=idb.transaction(storeName,"readwrite");tx.objectStore(storeName).put(value);tx.oncomplete=()=>resolve();tx.onerror=e=>reject(e.target.error);});}
+function idbGet(storeName,key){return new Promise((resolve,reject)=>{const tx=idb.transaction(storeName,"readonly");const req=tx.objectStore(storeName).get(key);req.onsuccess=()=>resolve(req.result);req.onerror=e=>reject(e.target.error);});}
+async function persistLocal(){if(!idb)return;try{await idbPut(IDB_STORE,{id:"main",data:store,users:users,updated:Date.now()});}catch(e){console.warn(e);}}
+async function loadLocal(){if(!idb)await openIDB();try{const row=await idbGet(IDB_STORE,"main");if(row&&row.data){store=row.data;if(!store.employees)store.employees=[];if(row.users&&row.users.length)users=row.users;return true;}}catch(e){}store={employees:[]};return true;}
+function loadUsersLocal(){try{const r=localStorage.getItem(AUTH_KEY);if(r){const u=JSON.parse(r);if(u&&u.length){users=u;return;}}}catch(e){}if(!users.length)users=[JSON.parse(JSON.stringify(DEFAULT_ADMIN))];}
+function saveUsersLocal(){localStorage.setItem(AUTH_KEY,JSON.stringify(users));}
+function uid(){return"e"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function touchFreshness(){const el=document.getElementById("data-freshness");if(el)el.textContent="Last refreshed: "+new Date().toLocaleString();}
+function updateSyncUI(){
+  const configured=!!(ghConfig.owner&&ghConfig.repo&&ghConfig.token);
+  const dot=document.getElementById("sync-dot"),lab=document.getElementById("sync-label");
+  if(ghBusy){dot.className="sync-dot busy";lab.textContent="Syncing…";}
+  else if(configured){dot.className="sync-dot on";lab.textContent="GitHub linked";}
+  else{dot.className="sync-dot";lab.textContent="Local only";}
+  const mode=document.getElementById("gh-mode-label");
+  if(mode)mode.textContent=configured?"GitHub shared store":"Local only";
+  const sha=document.getElementById("gh-sha-label");if(sha)sha.textContent=ghSha?ghSha.slice(0,12)+"…":"—";
+  const lp=document.getElementById("gh-pull-label");if(lp)lp.textContent=ghLastPull||"—";
+  const ps=document.getElementById("gh-push-label");if(ps)ps.textContent=ghLastPush||"—";
+  const ec=document.getElementById("gh-emp-count");if(ec)ec.textContent=String((store.employees||[]).length);
+  const home=document.getElementById("home-sync-hint");
+  if(home){if(configured){home.style.display="block";home.textContent="GitHub sync configured for "+ghConfig.owner+"/"+ghConfig.repo+" · Path: "+ghConfig.path+" · Use Pull / Push so all users share data.";}else home.style.display="none";}
+}
+
+/* ——— GitHub Contents API ——— */
+function ghHeaders(){return{Authorization:"Bearer "+ghConfig.token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};}
+function normalizeGhPath(p){
+  p=(p||"").trim().replace(/\\/g,"/");
+  p=p.replace(/^\/+/,"");
+  if(!p)p="data/vnh_store.json";
+  // reject empty segments and traversal
+  if(p.split("/").some(s=>!s||s==="."||s===".."))throw new Error("Invalid data file path");
+  if(!/\.[A-Za-z0-9]+$/.test(p))p=p.replace(/\/?$/,"")+"/vnh_store.json";
+  return p;
+}
+function ghContentsUrl(pathOverride){
+  const path=encodeURIComponent(normalizeGhPath(pathOverride||ghConfig.path)).replace(/%2F/g,"/");
+  return`https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${path}?ref=${encodeURIComponent(ghConfig.branch||"main")}`;
+}
+function ghContentsPutUrl(){
+  const path=encodeURIComponent(normalizeGhPath(ghConfig.path)).replace(/%2F/g,"/");
+  return`https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}/contents/${path}`;
+}
+function loadGithubConfig(){
+  try{const c=JSON.parse(localStorage.getItem(GH_CFG_KEY)||"{}");Object.assign(ghConfig,{owner:c.owner||"",repo:c.repo||"",branch:c.branch||"main",path:"data/vnh_store.json"});
+    try{ghConfig.path=normalizeGhPath(c.path||"data/vnh_store.json");}catch(e){ghConfig.path="data/vnh_store.json";}}catch(e){}
+  ghConfig.token=sessionStorage.getItem("vnh_gh_token")||"";
+  document.getElementById("gh-owner").value=ghConfig.owner;
+  document.getElementById("gh-repo").value=ghConfig.repo;
+  document.getElementById("gh-branch").value=ghConfig.branch||"main";
+  document.getElementById("gh-path").value=ghConfig.path||"data/vnh_store.json";
+  document.getElementById("gh-token").value=ghConfig.token;
+  updateSyncUI();
+}
+function saveGithubConfig(){
+  ghConfig.owner=document.getElementById("gh-owner").value.trim();
+  ghConfig.repo=document.getElementById("gh-repo").value.trim();
+  ghConfig.branch=document.getElementById("gh-branch").value.trim()||"main";
+  try{ghConfig.path=normalizeGhPath(document.getElementById("gh-path").value);}catch(e){showStatus("gh-status","Path error: "+e.message,false);return;}
+  document.getElementById("gh-path").value=ghConfig.path;
+  ghConfig.token=document.getElementById("gh-token").value.trim();
+  localStorage.setItem(GH_CFG_KEY,JSON.stringify({owner:ghConfig.owner,repo:ghConfig.repo,branch:ghConfig.branch,path:ghConfig.path}));
+  if(ghConfig.token)sessionStorage.setItem("vnh_gh_token",ghConfig.token);else sessionStorage.removeItem("vnh_gh_token");
+  updateSyncUI();showStatus("gh-status","Configuration saved (token in session only).",true);
+}
+function payloadForGithub(){return{version:3,updated:new Date().toISOString(),employees:store.employees,users:users};}
+async function testGithubConnection(){
+  if(!ghConfig.owner||!ghConfig.repo||!ghConfig.token){showStatus("gh-status","Fill owner, repo, and token.",false);return;}
+  ghBusy=true;updateSyncUI();
+  try{
+    const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(ghConfig.owner)}/${encodeURIComponent(ghConfig.repo)}`,{headers:ghHeaders()});
+    if(!r.ok)throw new Error((await r.json().catch(()=>({}))).message||r.statusText);
+    showStatus("gh-status","Connection OK — repository accessible.",true);
+  }catch(e){showStatus("gh-status","Failed: "+e.message,false);}
+  ghBusy=false;updateSyncUI();
+}
+async function githubPull(){
+  if(!ghConfig.owner||!ghConfig.repo||!ghConfig.token){showStatus("gh-status","Configure GitHub first.",false);alert("Open GitHub Sync and enter repository + token.");return;}
+  ghBusy=true;updateSyncUI();
+  try{
+    const r=await fetch(ghContentsUrl(),{headers:ghHeaders()});
+    if(r.status===404){
+      showStatus("gh-status","File not found on GitHub — Push to create it.",false);
+      ghSha=null;ghBusy=false;updateSyncUI();return;
+    }
+    if(!r.ok)throw new Error((await r.json().catch(()=>({}))).message||r.statusText);
+    const meta=await r.json();
+    ghSha=meta.sha;
+    const json=JSON.parse(atob(meta.content.replace(/\n/g,"")));
+    if(json.employees)store={employees:json.employees};
+    if(json.users&&json.users.length){users=json.users;saveUsersLocal();}
+    await persistLocal();
+    ghLastPull=new Date().toLocaleString();
+    touchFreshness();
+    showStatus("gh-status","Pulled "+store.employees.length+" employee(s) from GitHub.",true);
+    showStatus("emp-status","Data pulled from GitHub.",true);
+    if(document.getElementById("page-employees").classList.contains("active"))renderEmployeeList();
+    if(document.getElementById("page-dashboard").classList.contains("active"))refreshDashboard();
+    if(document.getElementById("page-competency").classList.contains("active"))renderCompetencyList();
+    if(document.getElementById("page-users").classList.contains("active"))renderUsers();
+  }catch(e){showStatus("gh-status","Pull failed: "+e.message,false);}
+  ghBusy=false;updateSyncUI();
+}
+async function githubPush(){
+  if(!ghConfig.owner||!ghConfig.repo||!ghConfig.token){showStatus("gh-status","Configure GitHub first.",false);alert("Open GitHub Sync and enter repository + token.");return;}
+  ghBusy=true;updateSyncUI();
+  try{
+    // refresh SHA to reduce conflicts
+    let sha=ghSha;
+    const check=await fetch(ghContentsUrl(),{headers:ghHeaders()});
+    if(check.ok){const m=await check.json();sha=m.sha;ghSha=sha;}
+    else if(check.status!==404)throw new Error((await check.json().catch(()=>({}))).message||check.statusText);
+    const body={
+      message:"Update staff development data — "+(currentUser?currentUser.username:"user")+" @ "+new Date().toISOString(),
+      content:btoa(unescape(encodeURIComponent(JSON.stringify(payloadForGithub(),null,2)))),
+      branch:ghConfig.branch||"main"
+    };
+    if(sha)body.sha=sha;
+    const r=await fetch(ghContentsPutUrl(),{method:"PUT",headers:{...ghHeaders(),"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!r.ok){
+      const err=await r.json().catch(()=>({}));
+      if(r.status===409||(err.message||"").toLowerCase().includes("sha"))throw new Error("Conflict — someone else pushed first. Pull, then Push again.");
+      throw new Error(err.message||r.statusText);
+    }
+    const res=await r.json();
+    ghSha=res.content&&res.content.sha?res.content.sha:ghSha;
+    ghLastPush=new Date().toLocaleString();
+    await persistLocal();
+    showStatus("gh-status","Pushed to GitHub successfully.",true);
+    showStatus("emp-status","Pushed to GitHub.",true);
+    showStatus("log-status","Pushed to GitHub.",true);
+  }catch(e){showStatus("gh-status","Push failed: "+e.message,false);alert("Push failed: "+e.message);}
+  ghBusy=false;updateSyncUI();
+}
+
+function hasPriv(...keys){if(!currentUser)return false;const p=currentUser.privileges||[];if(p.includes("admin"))return true;return keys.some(k=>p.includes(k));}
+function isReadOnly(){if(!currentUser)return true;const p=currentUser.privileges||[];return !["admin","principal","quality_manager","lab_supervisor","scientist","technician"].some(x=>p.includes(x));}
+function canEdit(){return !isReadOnly();}
+function canManageUsers(){return hasPriv("admin");}
+function canVerify(){return hasPriv("admin","principal","quality_manager","lab_supervisor");}
+function canExport(){return hasPriv("admin","principal","quality_manager","lab_supervisor","scientist");}
+
+function applyPrivilegeUI(){
+  const edit=canEdit(),admin=canManageUsers(),exp=canExport();
+  const nu=document.getElementById("nav-users-btn");if(nu)nu.style.display=admin?"flex":"none";
+  ["btn-add-emp","btn-save-log","btn-add-act","btn-import-json","btn-save-comp"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=edit?"":"none";});
+  ["btn-export-all","btn-export-word","btn-export-json"].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=exp?"":"none";});
+  const imp=document.getElementById("btn-import-all");if(imp)imp.style.display=admin?"":"none";
+  const faz=document.getElementById("file-attach-zone");if(faz)faz.style.display=edit?"block":"none";
+  document.getElementById("home-priv-hint").textContent="Signed in as "+(currentUser.displayName||currentUser.username)+" · Configure GitHub Sync for multi-user shared data.";
+  document.querySelectorAll("#page-log input,#page-log select,#page-log textarea").forEach(el=>{if(!edit&&el.id!=="ach-file")el.disabled=true;else if(edit)el.disabled=false;});
+}
+
+async function doLogin(){
+  const u=document.getElementById("login-user").value.trim(),p=document.getElementById("login-pass").value;
+  const err=document.getElementById("login-error");
+  loadUsersLocal();
+  let user=users.find(x=>x.username===u&&x.password===p&&x.active!==false);
+  if(!user){err.textContent="Invalid credentials or inactive account.";err.classList.add("show");return;}
+  if(!idb)await openIDB();
+  await loadLocal();
+  // reload users after local load may have replaced
+  user=users.find(x=>x.username===u&&x.password===p&&x.active!==false)||user;
+  currentUser=user;
+  sessionStorage.setItem("vnh_sdl_session",JSON.stringify({username:user.username}));
+  err.classList.remove("show");enterApp();
+  // auto-pull if configured
+  if(ghConfig.owner&&ghConfig.repo&&ghConfig.token){setTimeout(()=>githubPull(),300);}
+}
+function doLogout(){sessionStorage.removeItem("vnh_sdl_session");currentUser=null;currentId=null;currentCompId=null;document.getElementById("app-shell").classList.remove("active");document.getElementById("page-login").classList.add("active");document.getElementById("login-pass").value="";}
+function enterApp(){document.getElementById("page-login").classList.remove("active");document.getElementById("app-shell").classList.add("active");document.getElementById("user-chip").textContent=currentUser.displayName||currentUser.username;loadGithubConfig();applyPrivilegeUI();touchFreshness();showPage("home");}
+async function changePassword(){const p1=document.getElementById("new-pass").value,p2=document.getElementById("new-pass2").value;if(!p1||p1.length<6){showStatus("pass-status","Min 6 characters.",false);return;}if(p1!==p2){showStatus("pass-status","No match.",false);return;}const u=users.find(x=>x.username===currentUser.username);if(u){u.password=p1;currentUser.password=p1;saveUsersLocal();}await persistLocal();showStatus("pass-status","Updated. Push to share with others.",true);document.getElementById("new-pass").value="";document.getElementById("new-pass2").value="";}
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.getElementById("page-login").classList.contains("active"))doLogin();});
+
+function showPage(name){
+  if(!currentUser)return;
+  if(name==="users"&&!canManageUsers()){alert("Administrator required.");return;}
+  document.querySelectorAll(".main .page").forEach(p=>p.classList.remove("active"));
+  const el=document.getElementById("page-"+name);if(el)el.classList.add("active");
+  document.querySelectorAll(".sidebar .nav-btn").forEach(b=>{b.classList.toggle("active",b.dataset.page===name);});
+  document.getElementById("nav-log-btn").style.display=currentId?"flex":"none";
+  document.getElementById("nav-cv-btn").style.display=currentId?"flex":"none";
+  if(name==="employees")renderEmployeeList();
+  if(name==="competency"){renderCompetencyList();if(currentCompId)openCompetencyDetail(currentCompId,false);}
+  if(name==="dashboard")refreshDashboard();
+  if(name==="users")renderUsers();
+  if(name==="github"){loadGithubConfig();updateSyncUI();}
+  if(name==="cv"&&currentId)renderCV(currentId);
+  if(name==="log"&&currentId){initSigPads();applyPrivilegeUI();}
+}
+function setLogos(){const src=COA_B64&&COA_B64.length>100?"data:image/png;base64,"+COA_B64:"";["login-logo","hdr-logo","cover-logo","form-logo"].forEach(id=>{const img=document.getElementById(id);if(img){img.src=src;img.onerror=()=>{img.style.display="none"};}});}
+
+function filteredEmployees(){const sec=document.getElementById("dash-section")?.value||"";const q=(document.getElementById("dash-search")?.value||"").toLowerCase();return store.employees.filter(e=>{if(sec&&(e.section||"")!==sec)return false;if(q&&!(e.name||"").toLowerCase().includes(q)&&!(e.staffId||"").toLowerCase().includes(q))return false;return true;});}
+function staffCpd(e){let t=0;(e.activities||[]).forEach(a=>t+=+a.cpd||0);if(e.cpdPoints)t=Math.max(t,+e.cpdPoints||0);return t;}
+function refreshDashboard(){
+  const emps=filteredEmployees();
+  const sections=new Set();store.employees.forEach(e=>{if(e.section)sections.add(e.section);});
+  const sel=document.getElementById("dash-section");const cur=sel.value;
+  sel.innerHTML='<option value="">All sections</option>';[...sections].sort().forEach(s=>{sel.innerHTML+=`<option value="${escAttr(s)}">${esc(s)}</option>`;});sel.value=cur;
+  let competent=0,further=0,notYet=0,totalCpd=0,acts=0,dueSoon=0;const today=new Date();const soon=new Date(today);soon.setDate(soon.getDate()+90);const typeCount={};
+  emps.forEach(e=>{totalCpd+=staffCpd(e);acts+=(e.activities||[]).length;const o=e.outcome||"";if(o==="Competent")competent++;else if(o==="Requires further training")further++;else if(o==="Not yet competent")notYet++;if(e.authReview){const d=new Date(e.authReview);if(!isNaN(d)&&d>=today&&d<=soon)dueSoon++;}(e.activities||[]).forEach(a=>{const t=a.type||"Other";typeCount[t]=(typeCount[t]||0)+1;});});
+  const n=emps.length||1;
+  document.getElementById("kpi-grid").innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Staff records</div><div class="kpi-value">${emps.length}</div><div class="kpi-cmp">Filtered</div></div>
+    <div class="kpi-card ok"><div class="kpi-label">Competent</div><div class="kpi-value">${competent}</div><div class="kpi-cmp"><span class="kpi-trend up">▲ ${Math.round(100*competent/n)}%</span></div></div>
+    <div class="kpi-card warn"><div class="kpi-label">Further training</div><div class="kpi-value">${further}</div></div>
+    <div class="kpi-card ${notYet?"bad":""}"><div class="kpi-label">Not yet competent</div><div class="kpi-value">${notYet}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total CPD</div><div class="kpi-value">${totalCpd.toFixed(1)}</div><div class="kpi-cmp">${acts} activities</div></div>
+    <div class="kpi-card ${dueSoon?"warn":"ok"}"><div class="kpi-label">Re-auth ≤90d</div><div class="kpi-value">${dueSoon}</div></div>`;
+  const oc=[{l:"Competent",v:competent,c:"#1a5f2a"},{l:"Further training",v:further,c:"#b45309"},{l:"Not yet",v:notYet,c:"#8b1a1a"},{l:"Unset",v:Math.max(0,emps.length-competent-further-notYet),c:"#94a3b8"}];
+  document.getElementById("chart-outcomes").innerHTML=svgDonut(oc);
+  const top=[...emps].map(e=>({l:(e.name||"?").split(" ").slice(-1)[0],v:staffCpd(e)})).sort((a,b)=>b.v-a.v).slice(0,8);
+  document.getElementById("chart-cpd").innerHTML=svgBars(top,"#0c2d48");
+  const types=Object.entries(typeCount).map(([l,v])=>({l:l.length>22?l.slice(0,20)+"…":l,v})).sort((a,b)=>b.v-a.v).slice(0,8);
+  document.getElementById("chart-types").innerHTML=svgBars(types,"#1a5f2a");
+  const dueList=emps.filter(e=>e.authReview).map(e=>({l:(e.name||"?").split(" ").slice(-1)[0],v:e.authReview})).sort((a,b)=>a.v.localeCompare(b.v)).slice(0,8);
+  document.getElementById("chart-auth").innerHTML=dueList.length?`<ul style="font-size:.8rem;margin:0;padding-left:1.1rem">${dueList.map(d=>`<li><strong>${esc(d.l)}</strong> — ${esc(d.v)} ${authBadge(d.v)}</li>`).join("")}</ul>`:"<p style='font-size:.8rem;color:var(--muted)'>None set.</p>";
+  const tbody=document.getElementById("dash-tbody");tbody.innerHTML="";
+  emps.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(e=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><strong>${esc(e.name||"—")}</strong></td><td>${esc(e.section||"—")}</td><td>${esc(e.post||"—")}</td><td>${(e.activities||[]).length}</td><td>${staffCpd(e).toFixed(1)}</td><td>${outcomeBadge(e.outcome)}</td><td>${esc(e.authReview||"—")} ${e.authReview?authBadge(e.authReview):""}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="openLog('${e.id}')">Log</button> <button class="btn btn-secondary btn-sm" onclick="openCompetencyDetail('${e.id}')">Competency</button></td>`;
+    tbody.appendChild(tr);
+  });
+  touchFreshness();
+}
+function resetDashFilters(){document.getElementById("dash-from").value="";document.getElementById("dash-to").value="";document.getElementById("dash-section").value="";document.getElementById("dash-search").value="";refreshDashboard();}
+function outcomeBadge(o){if(o==="Competent")return'<span class="badge badge-green">Competent</span>';if(o==="Requires further training")return'<span class="badge badge-amber">Further training</span>';if(o==="Not yet competent")return'<span class="badge badge-red">Not yet</span>';return'<span class="badge badge-blue">—</span>';}
+function authBadge(dateStr){const d=new Date(dateStr),t=new Date();if(isNaN(d))return"";const days=(d-t)/864e5;if(days<0)return'<span class="badge badge-red">Overdue</span>';if(days<=90)return'<span class="badge badge-amber">Due soon</span>';return'<span class="badge badge-green">OK</span>';}
+function svgDonut(parts){const sum=parts.reduce((a,p)=>a+p.v,0)||1;let ang=-Math.PI/2;const cx=90,cy=90,r=70,ri=42;let paths="";parts.forEach(p=>{const slice=2*Math.PI*(p.v/sum);const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang);const x2=cx+r*Math.cos(ang+slice),y2=cy+r*Math.sin(ang+slice);const x3=cx+ri*Math.cos(ang+slice),y3=cy+ri*Math.sin(ang+slice);const x4=cx+ri*Math.cos(ang),y4=cy+ri*Math.sin(ang);const large=slice>Math.PI?1:0;if(p.v>0)paths+=`<path d="M${x1} ${y1} A${r} ${r} 0 ${large} 1 ${x2} ${y2} L${x3} ${y3} A${ri} ${ri} 0 ${large} 0 ${x4} ${y4} Z" fill="${p.c}"><title>${p.l}: ${p.v}</title></path>`;ang+=slice;});const legend=parts.map(p=>`<span style="display:inline-block;margin:.15rem .4rem 0 0;font-size:.7rem"><span style="display:inline-block;width:10px;height:10px;background:${p.c};border-radius:2px;margin-right:3px"></span>${esc(p.l)} (${p.v})</span>`).join("");return`<svg viewBox="0 0 180 180">${paths}<text x="90" y="94" text-anchor="middle" font-size="13" fill="#0c2d48" font-weight="700">${sum}</text></svg><div>${legend}</div>`;}
+function svgBars(items,color){if(!items.length)return"<p style='font-size:.8rem;color:var(--muted)'>No data</p>";const max=Math.max(...items.map(i=>i.v),0.1);const w=320,h=items.length*28+10;let bars="";items.forEach((it,i)=>{const bw=Math.max(2,(it.v/max)*220);const y=i*28+4;bars+=`<text x="0" y="${y+14}" font-size="11" fill="#334">${esc(it.l)}</text><rect x="90" y="${y+2}" width="${bw}" height="16" fill="${color}" rx="2"></rect><text x="${95+bw}" y="${y+14}" font-size="11" fill="#555">${typeof it.v==="number"?(it.v.toFixed?it.v.toFixed(1):it.v):it.v}</text>`;});return`<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${bars}</svg>`;}
+function exportDashCSV(){const emps=filteredEmployees();let csv="Name,StaffID,Section,Position,Activities,CPD,Outcome,AuthReview\n";emps.forEach(e=>{csv+=`"${(e.name||"").replace(/"/g,'""')}","${e.staffId||""}","${e.section||""}","${e.post||""}",${(e.activities||[]).length},${staffCpd(e).toFixed(1)},"${e.outcome||""}","${e.authReview||""}"\n`;});const blob=new Blob([csv],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="VNH_Dashboard_Export.csv";a.click();}
+
+function renderCompetencyList(){
+  const q=(document.getElementById("comp-search")?.value||"").toLowerCase();
+  const tbody=document.getElementById("comp-tbody"),empty=document.getElementById("empty-comp");
+  tbody.innerHTML="";
+  let list=store.employees.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+  if(q)list=list.filter(e=>(e.name||"").toLowerCase().includes(q)||(e.staffId||"").toLowerCase().includes(q));
+  if(!list.length){empty.style.display="block";document.getElementById("comp-table").style.display="none";return;}
+  empty.style.display="none";document.getElementById("comp-table").style.display="table";
+  list.forEach(e=>{
+    const tasks=(e.authTasks||"").slice(0,60)+(e.authTasks&&e.authTasks.length>60?"…":"");
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><strong>${esc(e.name||"—")}</strong></td><td>${esc(e.staffId||"—")}</td><td>${esc(e.section||"—")}</td><td>${esc(tasks||"—")}</td><td>${outcomeBadge(e.outcome)}</td><td>${esc(e.authReview||"—")} ${e.authReview?authBadge(e.authReview):""}</td>
+      <td>${e.authTasks||e.outcome?'<span class="badge badge-green">Recorded</span>':'<span class="badge badge-blue">Incomplete</span>'}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="openCompetencyDetail('${e.id}')">Open</button> <button class="btn btn-secondary btn-sm" onclick="openLog('${e.id}')">Dev. Log</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function openCompetencyDetail(id,switchPage=true){
+  const emp=store.employees.find(e=>e.id===id);if(!emp)return;
+  currentCompId=id;
+  document.getElementById("comp-detail-card").style.display="block";
+  document.getElementById("comp-detail-title").textContent="Competency — "+(emp.name||"");
+  document.getElementById("c-auth-tasks").value=emp.authTasks||"";
+  document.getElementById("c-auth-date").value=emp.authDate||"";
+  document.getElementById("c-auth-person").value=emp.authPerson||"";
+  document.getElementById("c-auth-scope").value=emp.authScope||"";
+  document.getElementById("c-auth-review").value=emp.authReview||"";
+  document.getElementById("c-outcome").value=emp.outcome||"";
+  document.getElementById("c-assess-date").value=emp.assessDate||"";
+  document.getElementById("c-assessor").value=emp.assessor||"";
+  document.getElementById("c-comments").value=emp.assessComments||"";
+  const edit=canEdit();
+  document.querySelectorAll("#comp-detail-card input,#comp-detail-card select,#comp-detail-card textarea").forEach(el=>el.disabled=!edit);
+  if(switchPage)showPage("competency");
+}
+async function saveCompetencyDetail(){
+  if(!currentCompId||!canEdit())return;
+  const emp=store.employees.find(e=>e.id===currentCompId);if(!emp)return;
+  emp.authTasks=document.getElementById("c-auth-tasks").value.trim();
+  emp.authDate=document.getElementById("c-auth-date").value;
+  emp.authPerson=document.getElementById("c-auth-person").value.trim();
+  emp.authScope=document.getElementById("c-auth-scope").value.trim();
+  emp.authReview=document.getElementById("c-auth-review").value;
+  emp.outcome=document.getElementById("c-outcome").value;
+  emp.assessDate=document.getElementById("c-assess-date").value;
+  emp.assessor=document.getElementById("c-assessor").value.trim();
+  emp.assessComments=document.getElementById("c-comments").value.trim();
+  await persistLocal();renderCompetencyList();showStatus("comp-detail-status","Saved locally. Push to share.",true);
+}
+function openCompetencyFromLog(){if(currentId)openCompetencyDetail(currentId);}
+
+function renderUsers(){const tbody=document.getElementById("users-tbody");tbody.innerHTML="";users.forEach((u,idx)=>{const tags=(u.privileges||[]).map(p=>`<span class="priv-tag">${PRIV_LABELS[p]||p}</span>`).join("");const tr=document.createElement("tr");tr.innerHTML=`<td><strong>${esc(u.username)}</strong></td><td>${esc(u.displayName||"—")}</td><td>${tags}</td><td>${u.active!==false?"Active":"Inactive"}</td><td><button class="btn btn-secondary btn-sm" onclick="editUser(${idx})">Edit</button>${u.username!=="admin"?` <button class="btn btn-danger btn-sm" onclick="deleteUser(${idx})">Delete</button>`:""}</td>`;tbody.appendChild(tr);});}
+function openAddUser(){document.getElementById("user-modal-title").textContent="Add User";document.getElementById("u-username").value="";document.getElementById("u-username").disabled=false;document.getElementById("u-displayname").value="";document.getElementById("u-password").value="";document.getElementById("u-active").value="1";document.querySelectorAll("#u-priv-list input").forEach(cb=>cb.checked=false);document.getElementById("user-modal").dataset.editIdx="";document.getElementById("user-modal").classList.add("open");}
+function editUser(idx){const u=users[idx];if(!u)return;document.getElementById("user-modal-title").textContent="Edit User";document.getElementById("u-username").value=u.username;document.getElementById("u-username").disabled=u.username==="admin";document.getElementById("u-displayname").value=u.displayName||"";document.getElementById("u-password").value="";document.getElementById("u-active").value=u.active!==false?"1":"0";document.querySelectorAll("#u-priv-list input").forEach(cb=>{cb.checked=(u.privileges||[]).includes(cb.value);});document.getElementById("user-modal").dataset.editIdx=String(idx);document.getElementById("user-modal").classList.add("open");}
+function closeUserModal(){document.getElementById("user-modal").classList.remove("open");}
+function saveUserFromModal(){const username=document.getElementById("u-username").value.trim();if(!username){alert("Username required");return;}const editIdx=document.getElementById("user-modal").dataset.editIdx;const privs=[];document.querySelectorAll("#u-priv-list input:checked").forEach(cb=>privs.push(cb.value));if(!privs.length){alert("Select privileges");return;}const displayName=document.getElementById("u-displayname").value.trim(),pass=document.getElementById("u-password").value,active=document.getElementById("u-active").value==="1";if(editIdx===""){if(users.some(u=>u.username===username)){alert("Exists");return;}if(!pass||pass.length<6){alert("Password min 6");return;}users.push({username,displayName,password:pass,active,privileges:privs});}else{const u=users[+editIdx];if(u.username!=="admin")u.username=username;u.displayName=displayName;u.active=active;u.privileges=privs;if(pass){if(pass.length<6){alert("Password min 6");return;}u.password=pass;}if(currentUser&&currentUser.username===u.username){currentUser=u;applyPrivilegeUI();}}saveUsersLocal();persistLocal();closeUserModal();renderUsers();showStatus("users-status","Saved. Push to share logins.",true);}
+function deleteUser(idx){const u=users[idx];if(!u||u.username==="admin")return;if(!confirm("Delete "+u.username+"?"))return;users.splice(idx,1);saveUsersLocal();persistLocal();renderUsers();}
+
+function initSigPads(){["staff","sup"].forEach(k=>{const canvas=document.getElementById("sig-"+k);if(!canvas)return;const ctx=canvas.getContext("2d");ctx.strokeStyle="#0c2d48";ctx.lineWidth=2;ctx.lineCap="round";let drawing=false,last=null;const pos=e=>{const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(canvas.width/r.width),y:(t.clientY-r.top)*(canvas.height/r.height)};};const start=e=>{if(!canEdit()&&k==="staff")return;if(!canVerify()&&k==="sup")return;e.preventDefault();drawing=true;last=pos(e);};const move=e=>{if(!drawing)return;e.preventDefault();const p=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;};const end=()=>{drawing=false;last=null;syncSigPrint(k);};canvas.onmousedown=start;canvas.onmousemove=move;canvas.onmouseup=end;canvas.onmouseleave=end;canvas.ontouchstart=start;canvas.ontouchmove=move;canvas.ontouchend=end;sigPads[k]={canvas,ctx};});}
+function clearSig(k){if(k==="sup"&&!canVerify()){alert("Privilege required");return;}if(k==="staff"&&!canEdit())return;const p=sigPads[k];if(!p)return;p.ctx.clearRect(0,0,p.canvas.width,p.canvas.height);const img=document.getElementById("sig-"+k+"-print");if(img){img.src="";img.style.display="none";}}
+function syncSigPrint(k){const canvas=document.getElementById("sig-"+k);const img=document.getElementById("sig-"+k+"-print");if(!canvas||!img)return;if(isCanvasBlank(canvas)){img.src="";return;}img.src=canvas.toDataURL("image/png");}
+function isCanvasBlank(canvas){const d=canvas.getContext("2d").getImageData(0,0,canvas.width,canvas.height).data;for(let i=3;i<d.length;i+=4)if(d[i]!==0)return false;return true;}
+function getSigData(k){const canvas=document.getElementById("sig-"+k);if(!canvas||isCanvasBlank(canvas))return null;return canvas.toDataURL("image/png");}
+function loadSigData(k,dataUrl){const canvas=document.getElementById("sig-"+k);const imgEl=document.getElementById("sig-"+k+"-print");if(!canvas)return;const ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);if(!dataUrl){if(imgEl)imgEl.src="";return;}const im=new Image();im.onload=()=>{ctx.drawImage(im,0,0,canvas.width,canvas.height);if(imgEl)imgEl.src=dataUrl;};im.src=dataUrl;}
+
+function validateLog(){let ok=true;document.querySelectorAll("#page-log .field[data-req=true]").forEach(f=>{const inp=f.querySelector("input,select,textarea");if(!inp)return;if(!inp.value.trim()){f.classList.add("invalid");ok=false;}else f.classList.remove("invalid");});return ok;}
+function clearValidation(){document.querySelectorAll(".field.invalid").forEach(f=>f.classList.remove("invalid"));}
+
+function renderEmployeeList(){
+  const tbody=document.getElementById("employee-tbody"),empty=document.getElementById("empty-employees");
+  tbody.innerHTML="";
+  if(!store.employees.length){empty.style.display="block";document.getElementById("employee-table").style.display="none";return;}
+  empty.style.display="none";document.getElementById("employee-table").style.display="table";
+  const edit=canEdit();
+  store.employees.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(emp=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><strong>${esc(emp.name||"—")}</strong></td><td>${esc(emp.staffId||"—")}</td><td>${esc(emp.post||"—")}</td><td>${esc(emp.section||"—")}</td>
+      <td>${(emp.activities||[]).length}</td><td>${(emp.achievements||[]).length}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="openLog('${emp.id}')">Log</button>
+      <button class="btn btn-secondary btn-sm" onclick="openCompetencyDetail('${emp.id}')">Competency</button>
+      <button class="btn btn-secondary btn-sm" onclick="openCV('${emp.id}')">CV</button>
+      ${edit?`<button class="btn btn-secondary btn-sm" onclick="editEmployee('${emp.id}')">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${emp.id}')">Delete</button>`:""}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function openAddEmployee(){if(!canEdit())return;document.getElementById("emp-modal-title").textContent="Add Employee";["m-name","m-staffid","m-post","m-section","m-start"].forEach(id=>document.getElementById(id).value="");document.getElementById("emp-modal").dataset.editId="";document.getElementById("emp-modal").classList.add("open");}
+function editEmployee(id){if(!canEdit())return;const emp=store.employees.find(e=>e.id===id);if(!emp)return;document.getElementById("emp-modal-title").textContent="Edit Employee";document.getElementById("m-name").value=emp.name||"";document.getElementById("m-staffid").value=emp.staffId||"";document.getElementById("m-post").value=emp.post||"";document.getElementById("m-section").value=emp.section||"";document.getElementById("m-start").value=emp.startDate||"";document.getElementById("emp-modal").dataset.editId=id;document.getElementById("emp-modal").classList.add("open");}
+function closeEmpModal(){document.getElementById("emp-modal").classList.remove("open");}
+async function saveEmployeeFromModal(){if(!canEdit())return;const name=document.getElementById("m-name").value.trim();if(!name){alert("Name required");return;}const editId=document.getElementById("emp-modal").dataset.editId;const base={name,staffId:document.getElementById("m-staffid").value.trim(),post:document.getElementById("m-post").value.trim(),section:document.getElementById("m-section").value.trim(),startDate:document.getElementById("m-start").value};if(editId){const emp=store.employees.find(e=>e.id===editId);if(emp)Object.assign(emp,base);}else store.employees.push({id:uid(),...base,supervisor:"",onCall:"",compRef:"",qualifications:"",regNo:"",regExp:"",activities:[],actDesc:"",assessMethod:"",assessDate:"",assessor:"",outcome:"",assessComments:"",evidence:"",authTasks:"",authDate:"",authPerson:"",authScope:"",authReview:"",cpdPoints:"",profBody:"",reflection:"",suitability:"",perfLink:"",devNeeds:"",pdp:"",achievements:[],recordNo:"",version:"03",nextAssess:"",retention:"",staffSigDate:"",supSigDate:"",sigStaff:null,sigSup:null,attachments:{},attNotes:""});await persistLocal();closeEmpModal();renderEmployeeList();showStatus("emp-status","Saved. Push to share.",true);}
+async function deleteEmployee(id){if(!canEdit())return;if(!confirm("Delete employee?"))return;store.employees=store.employees.filter(e=>e.id!==id);if(currentId===id)currentId=null;await persistLocal();renderEmployeeList();showStatus("emp-status","Deleted. Push to share.",true);}
+
+function openLog(id){
+  const emp=store.employees.find(e=>e.id===id);if(!emp)return;
+  currentId=id;currentAchievements=JSON.parse(JSON.stringify(emp.achievements||[]));clearValidation();
+  const map={name:"name",staffid:"staffId",post:"post",section:"section",start:"startDate",supervisor:"supervisor",oncall:"onCall","comp-ref":"compRef",qual:"qualifications","reg-no":"regNo","reg-exp":"regExp","act-desc":"actDesc","assess-method":"assessMethod","assess-date":"assessDate",assessor:"assessor",outcome:"outcome","assess-comments":"assessComments",evidence:"evidence","auth-tasks":"authTasks","auth-date":"authDate","auth-person":"authPerson","auth-scope":"authScope","auth-review":"authReview","cpd-points":"cpdPoints","prof-body":"profBody",reflection:"reflection",suitability:"suitability","perf-link":"perfLink","dev-needs":"devNeeds",pdp:"pdp","record-no":"recordNo",version:"version","next-assess":"nextAssess",retention:"retention","staff-sig-date":"staffSigDate","sup-sig-date":"supSigDate","att-notes":"attNotes"};
+  Object.keys(map).forEach(k=>setVal("f-"+k,emp[map[k]]));
+  const atts=emp.attachments||{};document.querySelectorAll("#attachments-grid input").forEach(cb=>{cb.checked=!!atts[cb.dataset.att];});
+  renderActivities(emp.activities||[]);renderAchievements();
+  document.getElementById("file-chosen-label").textContent="No file chosen";document.getElementById("file-chosen-label").classList.remove("has-file");
+  showPage("log");
+  setTimeout(()=>{initSigPads();loadSigData("staff",emp.sigStaff);loadSigData("sup",emp.sigSup);applyPrivilegeUI();},40);
+}
+function setVal(id,v){const el=document.getElementById(id);if(el)el.value=v==null?"":v;}
+function val(id){const el=document.getElementById(id);return el?el.value.trim():"";}
+function renderActivities(list){const tbody=document.getElementById("activity-tbody");tbody.innerHTML="";if(!list.length){addActivityRow();addActivityRow();}else list.forEach(a=>addActivityRow(a));recalcTotals();}
+function addActivityRow(data){if(!canEdit()&&data===undefined)return;data=data||{};const tr=document.createElement("tr");const typeOpts=ACTIVITY_TYPES.map(t=>`<option value="${escAttr(t)}" ${data.type===t?"selected":""}>${esc(t)}</option>`).join("");const delOpts=DELIVERY_METHODS.map(t=>`<option value="${escAttr(t)}" ${data.delivery===t?"selected":""}>${esc(t)}</option>`).join("");tr.innerHTML=`<td><input type="text" class="a-date" value="${escAttr(data.date||"")}"/></td><td><input type="text" class="a-title" value="${escAttr(data.title||"")}"/></td><td><select class="a-type"><option value="">—</option>${typeOpts}</select></td><td><select class="a-delivery"><option value="">—</option>${delOpts}</select></td><td><input type="text" class="a-duration" value="${escAttr(data.duration||"")}"/></td><td><input type="text" class="a-trainer" value="${escAttr(data.trainer||"")}"/></td><td><input type="text" class="a-location" value="${escAttr(data.location||"")}"/></td><td><input type="number" step="0.1" min="0" class="a-cpd" value="${data.cpd??""}" oninput="recalcTotals()"/></td><td class="no-print">${canEdit()?`<button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();recalcTotals()">×</button>`:""}</td>`;document.getElementById("activity-tbody").appendChild(tr);}
+function collectActivities(){const list=[];document.querySelectorAll("#activity-tbody tr").forEach(tr=>{const date=tr.querySelector(".a-date").value.trim(),title=tr.querySelector(".a-title").value.trim(),type=tr.querySelector(".a-type").value,delivery=tr.querySelector(".a-delivery").value,duration=tr.querySelector(".a-duration").value.trim(),trainer=tr.querySelector(".a-trainer").value.trim(),location=tr.querySelector(".a-location").value.trim(),cpd=parseFloat(tr.querySelector(".a-cpd").value)||0;if(date||title||type||delivery||duration||trainer||location||cpd)list.push({date,title,type,delivery,duration,trainer,location,cpd});});return list;}
+function recalcTotals(){let t=0;collectActivities().forEach(a=>{t+=+a.cpd||0;});document.getElementById("tot-cpd").textContent=t.toFixed(1);}
+
+function handleAchievementFiles(ev){if(!canEdit())return;const files=Array.from(ev.target.files||[]);const label=document.getElementById("file-chosen-label");if(!files.length){label.textContent="No file chosen";label.classList.remove("has-file");return;}label.textContent=files.length===1?files[0].name:files.length+" files";label.classList.add("has-file");const title=document.getElementById("ach-title").value.trim()||"Achievement",date=document.getElementById("ach-date").value,type=document.getElementById("ach-type").value;files.forEach(file=>{if(file.size>MAX_FILE){alert("File too large (max 4 MB for GitHub sync)");return;}const reader=new FileReader();reader.onload=()=>{const isImage=file.type.startsWith("image/");currentAchievements.push({id:uid(),title:files.length>1?`${title} (${file.name})`:title,date,type,fileName:file.name,mime:file.type,size:file.size,isImage,dataUrl:isImage?reader.result:null});renderAchievements();showStatus("log-status","Attached. Save then Push.",true);};reader.readAsDataURL(file);});document.getElementById("ach-title").value="";}
+function renderAchievements(){const grid=document.getElementById("ach-grid"),printEl=document.getElementById("print-achievements");grid.innerHTML="";printEl.innerHTML="";if(!currentAchievements.length){grid.innerHTML='<div style="grid-column:1/-1;font-size:.78rem;color:var(--muted)">No files.</div>';return;}currentAchievements.forEach((a,idx)=>{const card=document.createElement("div");card.className="ach-card";const del=canEdit()?`<div class="ach-actions no-print"><button class="btn btn-danger btn-sm" onclick="removeAchievement(${idx})">×</button></div>`:"";if(a.isImage&&a.dataUrl)card.innerHTML=`${del}<img src="${a.dataUrl}" alt=""/><div class="ach-meta"><strong>${esc(a.title)}</strong>${esc(a.type)}</div>`;else card.innerHTML=`${del}<div class="file-icon">📄</div><div class="ach-meta"><strong>${esc(a.title)}</strong>${esc(a.fileName||"")}</div>`;grid.appendChild(card);const p=document.createElement("div");p.className="print-ach-item";p.innerHTML=a.isImage&&a.dataUrl?`<img src="${a.dataUrl}" alt=""/><div class="cap"><strong>${esc(a.title)}</strong></div>`:`<div class="cap"><strong>${esc(a.title)}</strong></div>`;printEl.appendChild(p);});}
+function removeAchievement(idx){if(!canEdit())return;currentAchievements.splice(idx,1);renderAchievements();}
+
+async function saveCurrentLog(validate){
+  if(!currentId||!canEdit()){showStatus("log-status","No edit privilege.",false);return;}
+  if(validate&&!validateLog()){showStatus("log-status","Fix required fields.",false);return;}
+  clearValidation();
+  const emp=store.employees.find(e=>e.id===currentId);if(!emp)return;
+  emp.name=val("f-name");emp.staffId=val("f-staffid");emp.post=val("f-post");emp.section=val("f-section");
+  emp.startDate=val("f-start");emp.supervisor=val("f-supervisor");emp.onCall=val("f-oncall");
+  emp.compRef=val("f-comp-ref");emp.qualifications=val("f-qual");emp.regNo=val("f-reg-no");emp.regExp=val("f-reg-exp");
+  emp.activities=collectActivities();emp.actDesc=val("f-act-desc");
+  emp.assessMethod=val("f-assess-method");emp.assessDate=val("f-assess-date");emp.assessor=val("f-assessor");
+  emp.outcome=val("f-outcome");emp.assessComments=val("f-assess-comments");emp.evidence=val("f-evidence");
+  emp.authTasks=val("f-auth-tasks");emp.authDate=val("f-auth-date");emp.authPerson=val("f-auth-person");
+  emp.authScope=val("f-auth-scope");emp.authReview=val("f-auth-review");
+  emp.cpdPoints=val("f-cpd-points");emp.profBody=val("f-prof-body");emp.reflection=val("f-reflection");emp.suitability=val("f-suitability");
+  emp.perfLink=val("f-perf-link");emp.devNeeds=val("f-dev-needs");emp.pdp=val("f-pdp");
+  emp.achievements=currentAchievements;
+  emp.recordNo=val("f-record-no");emp.version=val("f-version");emp.nextAssess=val("f-next-assess");emp.retention=val("f-retention");
+  emp.staffSigDate=val("f-staff-sig-date");emp.supSigDate=val("f-sup-sig-date");
+  emp.sigStaff=getSigData("staff");emp.sigSup=getSigData("sup");
+  const atts={};document.querySelectorAll("#attachments-grid input").forEach(cb=>{atts[cb.dataset.att]=cb.checked;});emp.attachments=atts;emp.attNotes=val("f-att-notes");
+  await persistLocal();showStatus("log-status","Saved locally. Push to share on GitHub.",true);
+}
+function printLog(){const go=()=>{syncSigPrint("staff");syncSigPrint("sup");document.querySelectorAll(".sig-print").forEach(img=>{if(img.src)img.style.display="block";});document.getElementById("print-achievements").style.display="grid";document.getElementById("page-log").classList.add("print-mode");window.print();setTimeout(()=>{document.getElementById("page-log").classList.remove("print-mode");document.getElementById("print-achievements").style.display="none";document.querySelectorAll(".sig-print").forEach(img=>img.style.display="none");},800);};if(canEdit())saveCurrentLog(false).then(go);else go();}
+
+function openCV(id){currentId=id;showPage("cv");}
+function openCVFromLog(){if(currentId){if(canEdit())saveCurrentLog(false).then(()=>showPage("cv"));else showPage("cv");}}
+function renderCV(id){const emp=store.employees.find(e=>e.id===id);if(!emp)return;const coa=COA_B64&&COA_B64.length>100?"data:image/png;base64,"+COA_B64:"";const acts=emp.activities||[],achs=emp.achievements||[];let cpd=staffCpd(emp);const actHtml=acts.length?`<ul>${acts.map(a=>`<li><strong>${esc(a.title||"")}</strong>${a.date?" ("+esc(a.date)+")":""}</li>`).join("")}</ul>`:"<p>None</p>";const achHtml=achs.length?`<ul>${achs.map(a=>`<li>${esc(a.title)} — ${esc(a.type)}</li>`).join("")}</ul>`:"<p>None</p>";document.getElementById("cv-content").innerHTML=`<div class="cv-header">${coa?`<img src="${coa}" alt=""/>`:""}<div><h1>${esc(emp.name||"")}</h1><div style="color:var(--green);font-weight:600">${esc(emp.post||"")} · ${esc(emp.section||"")}</div></div></div>
+<div class="cv-section"><h3>Employment</h3><p>Staff ID: ${esc(emp.staffId||"—")} · Start: ${esc(emp.startDate||"—")}</p></div>
+<div class="cv-section"><h3>Qualifications</h3><p>${esc(emp.qualifications||"—")}</p></div>
+<div class="cv-section"><h3>Training &amp; CPD</h3>${actHtml}<p>Total CPD: ${cpd.toFixed(1)}</p></div>
+<div class="cv-section"><h3>Competence</h3><p>${esc(emp.outcome||"—")}</p></div>
+<div class="cv-section"><h3>Authorisation</h3><p>${esc(emp.authTasks||"None")}</p></div>
+<div class="cv-section"><h3>Achievements</h3>${achHtml}</div>`;}
+function printCV(){document.getElementById("page-cv").classList.add("print-mode");window.print();setTimeout(()=>document.getElementById("page-cv").classList.remove("print-mode"),600);}
+function exportCVWord(){const emp=store.employees.find(e=>e.id===currentId);if(!emp)return;const content=document.getElementById("cv-content").innerHTML;const blob=new Blob(["\ufeff<!DOCTYPE html><html><head><meta charset=utf-8></head><body>"+content+"</body></html>"],{type:"application/msword"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`CV_${(emp.name||"staff").replace(/[^a-z0-9]/gi,"_")}.doc`;a.click();}
+function exportWord(){if(!canExport())return;const emp=store.employees.find(e=>e.id===currentId);if(!emp)return;const rows=(emp.activities||[]).map(a=>`<tr><td>${esc(a.date)}</td><td>${esc(a.title)}</td><td>${esc(a.type)}</td><td>${a.cpd||""}</td></tr>`).join("")||"<tr><td colspan=4>None</td></tr>";const html=`<!DOCTYPE html><html><head><meta charset=utf-8><style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #333;padding:3pt}th{background:#0c2d48;color:#fff}</style></head><body><h1>SDL — ${esc(emp.name)}</h1><table><thead><tr><th>Date</th><th>Title</th><th>Type</th><th>CPD</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;const blob=new Blob(["\ufeff"+html],{type:"application/msword"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`SDL_${(emp.name||"").replace(/[^a-z0-9]/gi,"_")}.doc`;a.click();}
+function exportLogJSON(){if(!canExport())return;const emp=store.employees.find(e=>e.id===currentId);if(!emp)return;const blob=new Blob([JSON.stringify(emp,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`SDL_${(emp.name||"").replace(/[^a-z0-9]/gi,"_")}.json`;a.click();}
+function importLogJSON(ev){if(!canEdit())return;const file=ev.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);if(!currentId){data.id=uid();store.employees.push(data);await persistLocal();openLog(data.id);}else{const emp=store.employees.find(e=>e.id===currentId);const kid=emp.id;Object.assign(emp,data);emp.id=kid;await persistLocal();openLog(currentId);}showStatus("log-status","Imported.",true);}catch(e){showStatus("log-status","Import failed.",false);}ev.target.value="";};reader.readAsText(file);}
+function exportAllData(){if(!canExport())return;const blob=new Blob([JSON.stringify(payloadForGithub(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="VNH_Staff_Development_All_Data.json";a.click();}
+function importAllData(ev){if(!canManageUsers())return;const file=ev.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=async()=>{try{const data=JSON.parse(reader.result);if(!data.employees)throw new Error("x");if(!confirm("Replace all data?"))return;store={employees:data.employees};if(data.users){users=data.users;saveUsersLocal();}await persistLocal();currentId=null;renderEmployeeList();showStatus("emp-status","Imported. Push to share.",true);}catch(e){showStatus("emp-status","Failed.",false);}ev.target.value="";};reader.readAsText(file);}
+
+function esc(s){if(s==null)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function escAttr(s){return esc(s).replace(/'/g,"&#39;");}
+function showStatus(id,msg,ok){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.className="status-msg show "+(ok?"ok":"err");setTimeout(()=>el.classList.remove("show"),5000);}
+
+document.addEventListener("DOMContentLoaded",async()=>{
+  setLogos();loadUsersLocal();loadGithubConfig();
+  try{await openIDB();await loadLocal();}catch(e){console.error(e);}
+  const sess=sessionStorage.getItem("vnh_sdl_session");
+  if(sess){try{const{username}=JSON.parse(sess);const user=users.find(u=>u.username===username&&u.active!==false);if(user){currentUser=user;enterApp();return;}}catch(e){}}
+  document.getElementById("page-login").classList.add("active");
+});
+</script>
+</body>
+</html>
